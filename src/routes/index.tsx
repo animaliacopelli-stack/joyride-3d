@@ -1,24 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GameCanvas } from "@/components/game/GameCanvas";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Prism Dash — 3D Rhythm Jump Game" },
+      {
+        name: "description",
+        content:
+          "Prism Dash is a fast 3D rhythm platformer: dodge neon spikes, switch skins, and play any song you search for.",
+      },
+      { property: "og:title", content: "Prism Dash — 3D Rhythm Jump Game" },
+      {
+        property: "og:description",
+        content: "Dodge neon obstacles in a 3D rhythm runner set to any song you search for.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: GameCanvas,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
