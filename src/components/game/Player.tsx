@@ -160,7 +160,7 @@ function Face({ z }: { z: number }) {
           <meshStandardMaterial color="#20160a" roughness={0.4} />
         </mesh>
       ))}
-      <mesh position={[0, -0.1, 0]} rotation-x={Math.PI / 2} scale={[1, 0.45, 1]}>
+      <mesh position={[0, -0.1, 0]} rotation-z={Math.PI} scale={[1, 0.5, 1]}>
         <torusGeometry args={[0.2, 0.045, 10, 24, Math.PI]} />
         <meshStandardMaterial color="#20160a" roughness={0.4} />
       </mesh>
