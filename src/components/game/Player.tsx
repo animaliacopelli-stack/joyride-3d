@@ -105,7 +105,7 @@ export function Player({ onDeath }: { onDeath: () => void }) {
     <group ref={group} position={[0, 1.1, 0]}>
       <pointLight ref={glow} color={def.color} intensity={8} distance={9} />
       {skin === "smiley" && (
-        <mesh castShadow>
+        <mesh castShadow rotation-y={-Math.PI / 2}>
           <sphereGeometry args={[RADIUS, 40, 32]} />
           <meshStandardMaterial
             map={face}
@@ -117,7 +117,7 @@ export function Player({ onDeath }: { onDeath: () => void }) {
         </mesh>
       )}
       {skin === "cube" && (
-        <mesh castShadow>
+        <mesh castShadow rotation-y={-Math.PI / 2}>
           <boxGeometry args={[RADIUS * 1.75, RADIUS * 1.75, RADIUS * 1.75]} />
           <meshStandardMaterial
             map={face}
