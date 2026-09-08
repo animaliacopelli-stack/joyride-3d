@@ -102,22 +102,30 @@ class World {
   }
 
   /** Fill the lane ahead with obstacles. `intensity` 0..1 from the music. */
+  /** Fill the lane ahead with obstacles. `intensity` 0..1 from the music. */
   populate(intensity: number) {
     while (this.cursor < 190) {
       const r = this.rng();
-      const diff = Math.min(1, this.distance / 2500) * 0.6 + intensity * 0.4;
-      const gap = 13 + this.rng() * 12 - diff * 5;
+      
+      // FIX 1: Make the music intensity the main driver of the difficulty
+      const diff = Math.min(1, this.distance / 4000) * 0.2 + intensity * 0.8; 
+      
+      // FIX 2: Create massive gaps during quiet parts, and tight gaps during drops
+      const gap = 25 - (intensity * 18); // Gap shrinks drastically as music gets louder
 
       if (r < 0.44) {
-        const count = 1 + Math.floor(this.rng() * (diff > 0.45 ? 3 : 2));
+        // More spikes spawn when the music is intense
+        const count = 1 + Math.floor(this.rng() * (diff > 0.6 ? 4 : 2));
         for (let i = 0; i < count; i++) {
           this.obstacles.push({ x: this.cursor + i * 1.5, type: "spike", w: 1.2, h: 1.5 });
         }
         this.cursor += gap + count * 1.4;
       } else if (r < 0.78) {
-        const h = 1.6 + Math.round(this.rng() * 2) * 0.9;
+        const h = 1.6 + Math.round(this.rng() * 1) * 0.9;
         this.obstacles.push({ x: this.cursor, type: "block", w: 3.2, h });
-        if (this.rng() < 0.45) {
+        
+        // Sneaky spikes only spawn if the song is going hard
+        if (this.rng() < diff) {
           this.obstacles.push({ x: this.cursor + 3.4, type: "spike", w: 1.2, h: 1.5 });
         }
         this.cursor += gap + 4;
@@ -135,7 +143,6 @@ class World {
       }
     }
   }
-
   advance(dx: number) {
     this.distance += dx;
     this.cursor -= dx;
