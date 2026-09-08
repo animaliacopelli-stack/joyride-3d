@@ -105,28 +105,34 @@ export function Player({ onDeath }: { onDeath: () => void }) {
     <group ref={group} position={[0, 1.1, 0]}>
       <pointLight ref={glow} color={def.color} intensity={8} distance={9} />
       {skin === "smiley" && (
-        <mesh castShadow rotation-y={-Math.PI / 2}>
-          <sphereGeometry args={[RADIUS, 40, 32]} />
-          <meshStandardMaterial
-            map={face}
-            emissive={def.accent}
-            emissiveIntensity={0.25}
-            roughness={0.35}
-            metalness={0.05}
-          />
-        </mesh>
+        <group>
+          <mesh castShadow>
+            <sphereGeometry args={[RADIUS, 40, 32]} />
+            <meshStandardMaterial
+              color={def.color}
+              emissive={def.accent}
+              emissiveIntensity={0.25}
+              roughness={0.35}
+              metalness={0.05}
+            />
+          </mesh>
+          <Face z={RADIUS * 0.94} />
+        </group>
       )}
       {skin === "cube" && (
-        <mesh castShadow rotation-y={-Math.PI / 2}>
-          <boxGeometry args={[RADIUS * 1.75, RADIUS * 1.75, RADIUS * 1.75]} />
-          <meshStandardMaterial
-            map={face}
-            emissive={def.accent}
-            emissiveIntensity={0.3}
-            roughness={0.3}
-            metalness={0.2}
-          />
-        </mesh>
+        <group>
+          <mesh castShadow>
+            <boxGeometry args={[RADIUS * 1.75, RADIUS * 1.75, RADIUS * 1.75]} />
+            <meshStandardMaterial
+              map={face}
+              emissive={def.accent}
+              emissiveIntensity={0.3}
+              roughness={0.3}
+              metalness={0.2}
+            />
+          </mesh>
+          <Face z={RADIUS * 0.9} />
+        </group>
       )}
       {skin === "prism" && (
         <mesh castShadow rotation-x={Math.PI / 2}>
@@ -144,3 +150,21 @@ export function Player({ onDeath }: { onDeath: () => void }) {
     </group>
   );
 }
+
+function Face({ z }: { z: number }) {
+  return (
+    <group position={[0, 0.06, z]}>
+      {[-0.19, 0.19].map((x) => (
+        <mesh key={x} position={[x, 0.09, 0]} scale={[1, 1.4, 0.5]}>
+          <sphereGeometry args={[0.075, 16, 12]} />
+          <meshStandardMaterial color="#20160a" roughness={0.4} />
+        </mesh>
+      ))}
+      <mesh position={[0, -0.1, 0]} rotation-x={Math.PI / 2} scale={[1, 0.45, 1]}>
+        <torusGeometry args={[0.2, 0.045, 10, 24, Math.PI]} />
+        <meshStandardMaterial color="#20160a" roughness={0.4} />
+      </mesh>
+    </group>
+  );
+}
+

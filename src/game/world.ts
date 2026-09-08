@@ -96,7 +96,7 @@ class World {
     this.distance = 0;
     this.speed = 17;
     this.jumpQueued = false;
-    this.cursor = 45;
+    this.cursor = 32;
     this.shake = 0;
     this.rng = mulberry32(seed || 1);
   }
