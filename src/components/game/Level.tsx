@@ -43,9 +43,9 @@ export function Level({ themeIndex }: { themeIndex: number }) {
   const spikes = useRef<THREE.InstancedMesh>(null);
   const blocks = useRef<THREE.InstancedMesh>(null);
   const pillars = useRef<THREE.InstancedMesh>(null);
+  const orbs = useRef<THREE.InstancedMesh>(null);
   const groundMat = useRef<THREE.MeshStandardMaterial>(null);
   const rimLight = useRef<THREE.PointLight>(null);
-  const orbs = useRef<THREE.InstancedMesh>(null);
   const pillarOffsets = useRef<number[]>(
     Array.from({ length: MAX_PILLARS }, (_, i) => i * 9 + (i % 3) * 2),
   );
@@ -86,10 +86,9 @@ export function Level({ themeIndex }: { themeIndex: number }) {
     camera.lookAt(3.2, world.playerY * 0.45 + 1.6, 0);
 
     // instances
-// instances
     let si = 0;
     let bi = 0;
-    let oi = 0; // Orb counter
+    let oi = 0;
     for (const o of world.obstacles) {
       if (o.type === "spike" && si < MAX_SPIKES) {
         dummy.position.set(o.x, o.h / 2, 0);
@@ -106,7 +105,6 @@ export function Level({ themeIndex }: { themeIndex: number }) {
       } else if (o.type === "orb" && oi < MAX_ORBS) {
         dummy.position.set(o.x, o.h, 0);
         dummy.rotation.set(0, 0, 0);
-        // Makes the orb pulse and throb as it approaches!
         dummy.scale.setScalar(1 + Math.sin(t * 10 + o.x) * 0.15); 
         dummy.updateMatrix();
         orbs.current?.setMatrixAt(oi++, dummy.matrix);
@@ -116,19 +114,11 @@ export function Level({ themeIndex }: { themeIndex: number }) {
     dummy.updateMatrix();
     for (let i = si; i < MAX_SPIKES; i++) spikes.current?.setMatrixAt(i, dummy.matrix);
     for (let i = bi; i < MAX_BLOCKS; i++) blocks.current?.setMatrixAt(i, dummy.matrix);
-    for (let i = oi; i < MAX_ORBS; i++) orbs.current?.setMatrixAt(i, dummy.matrix); // Clean up unused orbs
+    for (let i = oi; i < MAX_ORBS; i++) orbs.current?.setMatrixAt(i, dummy.matrix);
     
     if (spikes.current) spikes.current.instanceMatrix.needsUpdate = true;
     if (blocks.current) blocks.current.instanceMatrix.needsUpdate = true;
-    if (orbs.current) orbs.current.instanceMatrix.needsUpdate = true; // Tell Three.js to render the orbs
-      }
-    }
-    dummy.scale.setScalar(0);
-    dummy.updateMatrix();
-    for (let i = si; i < MAX_SPIKES; i++) spikes.current?.setMatrixAt(i, dummy.matrix);
-    for (let i = bi; i < MAX_BLOCKS; i++) blocks.current?.setMatrixAt(i, dummy.matrix);
-    if (spikes.current) spikes.current.instanceMatrix.needsUpdate = true;
-    if (blocks.current) blocks.current.instanceMatrix.needsUpdate = true;
+    if (orbs.current) orbs.current.instanceMatrix.needsUpdate = true;
 
     // background pillars react to the beat
     const offs = pillarOffsets.current;
@@ -142,7 +132,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
       pillars.current?.setMatrixAt(i, dummy.matrix);
     }
     if (pillars.current) pillars.current.instanceMatrix.needsUpdate = true;
-  });
+  }); // <-- This is the bracket that was missing!
 
   return (
     <group>
@@ -170,7 +160,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
 
       <pointLight ref={rimLight} position={[2, 2, 4]} color={theme.grid} intensity={20} distance={30} />
 
-<instancedMesh ref={spikes} args={[null as any, null as any, MAX_SPIKES]} frustumCulled={false} castShadow>
+      <instancedMesh ref={spikes} args={[null as any, null as any, MAX_SPIKES]} frustumCulled={false} castShadow>
         <coneGeometry args={[0.85, 1.5, 4]} />
         <meshStandardMaterial
           color={theme.spike}
@@ -182,7 +172,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
         />
       </instancedMesh>
 
-<instancedMesh ref={blocks} args={[null as any, null as any, MAX_BLOCKS]} frustumCulled={false} castShadow receiveShadow>
+      <instancedMesh ref={blocks} args={[null as any, null as any, MAX_BLOCKS]} frustumCulled={false} castShadow receiveShadow>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
           color={theme.block}
@@ -193,17 +183,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
         />
       </instancedMesh>
 
-      <instancedMesh ref={orbs} args={[null as any, null as any, MAX_ORBS]} frustumCulled={false}>
-        <sphereGeometry args={[0.55, 16, 16]} />
-        <meshStandardMaterial
-          color="#ffff00"
-          emissive="#ffaa00"
-          emissiveIntensity={3}
-          roughness={0.1}
-        />
-      </instancedMesh>
-      
-<instancedMesh ref={pillars} args={[null as any, null as any, MAX_PILLARS]} frustumCulled={false}>
+      <instancedMesh ref={pillars} args={[null as any, null as any, MAX_PILLARS]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
           color={theme.bg}
@@ -211,6 +191,16 @@ export function Level({ themeIndex }: { themeIndex: number }) {
           emissiveIntensity={0.22}
           roughness={0.6}
           metalness={0.5}
+        />
+      </instancedMesh>
+      
+      <instancedMesh ref={orbs} args={[null as any, null as any, MAX_ORBS]} frustumCulled={false}>
+        <sphereGeometry args={[0.55, 16, 16]} />
+        <meshStandardMaterial
+          color="#ffff00"
+          emissive="#ffaa00"
+          emissiveIntensity={3}
+          roughness={0.1}
         />
       </instancedMesh>
     </group>
