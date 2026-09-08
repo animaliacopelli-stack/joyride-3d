@@ -4,8 +4,8 @@ import * as THREE from "three";
 import { world } from "@/game/world";
 import { useGameStore, SKINS, type SkinId } from "@/game/store";
 
-const GRAVITY = -68;
-const JUMP_V = 19.5;
+const GRAVITY = -60;
+const JUMP_V = 21.5;
 const RADIUS = 0.62;
 
 function makeFaceTexture(color: string) {
