@@ -77,7 +77,7 @@ class World {
   playerY = 0.6;
   playerVy = 0;
   grounded = true;
-  jumps = 0; // NEW: Tracks how many times we've jumped in the air
+  jumps = 0;
   groundHeight = 0;
   rotation = 0;
   distance = 0;
@@ -87,13 +87,12 @@ class World {
   rng = mulberry32(1);
   shake = 0;
 
-  // Make the seed optional. If no seed is provided, use Date.now() for total randomness!
   reset(seed?: number) {
     this.obstacles = [];
     this.playerY = 0.6;
     this.playerVy = 0;
     this.grounded = true;
-    this.jumps = 0; // Reset jumps
+    this.jumps = 0;
     this.groundHeight = 0;
     this.rotation = 0;
     this.distance = 0;
@@ -101,29 +100,21 @@ class World {
     this.jumpQueued = false;
     this.cursor = 32;
     this.shake = 0;
-    // This makes the level generation completely random every run!
-    this.rng = mulberry32(seed ?? Date.now()); 
+    this.rng = mulberry32(seed ?? Date.now());
   }
 
   populate(intensity: number) {
     while (this.cursor < 190) {
       const r = this.rng();
       
-      // PROGRESSIVE DIFFICULTY: distanceScale goes up endlessly as you run
       const distanceScale = this.distance / 3000; 
       const diff = Math.min(1, distanceScale) * 0.4 + intensity * 0.6;
-      
-      // Gaps shrink based on both the music drop AND how far you've survived
       const gap = Math.max(8, 24 - (intensity * 12) - (distanceScale * 6));
 
-      // NEW OBSTACLE: The "Double Jump Wall"
-      // Only spawns once the game starts getting harder (diff > 0.3)
       if (r < 0.15 && diff > 0.3) {
-        // Height is 4.5! You MUST double jump to clear this
         this.obstacles.push({ x: this.cursor, type: "block", w: 2.5, h: 4.5 });
         this.cursor += gap + 5;
       } 
-      // Regular Spikes
       else if (r < 0.5) {
         const count = 1 + Math.floor(this.rng() * (diff > 0.5 ? 4 : 2));
         for (let i = 0; i < count; i++) {
@@ -131,7 +122,6 @@ class World {
         }
         this.cursor += gap + count * 1.4;
       } 
-      // Regular Blocks
       else {
         const h = 1.6 + Math.round(this.rng() * 1) * 0.9;
         this.obstacles.push({ x: this.cursor, type: "block", w: 3.2, h });
@@ -152,3 +142,5 @@ class World {
     }
   }
 }
+
+export const world = new World();
