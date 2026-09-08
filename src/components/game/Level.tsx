@@ -77,11 +77,11 @@ export function Level({ themeIndex }: { themeIndex: number }) {
 
     // camera: slight follow + music shake
     world.shake = Math.max(0, world.shake - delta * 3);
-    const targetY = 4.2 + Math.min(world.playerY * 0.35, 2.2);
+    const targetY = 3.4 + Math.min(world.playerY * 0.4, 2.4);
     camera.position.y += (targetY - camera.position.y) * (1 - Math.exp(-6 * delta));
-    camera.position.z = 13 + level * 1.2 + world.shake * 1.5;
-    camera.position.x = -7 + Math.sin(t * 1.3) * 0.2 + world.shake * (Math.random() - 0.5);
-    camera.lookAt(1.5, world.playerY * 0.5 + 1.4, 0);
+    camera.position.z = 15.5 + level * 1.2 + world.shake * 1.2;
+    camera.position.x = 3.2 + Math.sin(t * 1.1) * 0.15 + world.shake * (Math.random() - 0.5) * 0.8;
+    camera.lookAt(3.2, world.playerY * 0.45 + 1.6, 0);
 
     // instances
     let si = 0;

@@ -45,7 +45,7 @@ export function GameCanvas() {
         <Canvas
           shadows
           dpr={[1, 1.75]}
-          camera={{ position: [-7, 4.5, 13], fov: 55, far: 400 }}
+          camera={{ position: [3.2, 4, 15.5], fov: 55, far: 400 }}
           gl={{ antialias: true }}
         >
           <Scene />
