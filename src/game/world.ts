@@ -1,4 +1,4 @@
-export type ObstacleType = "spike" | "block";
+export type ObstacleType = "spike" | "block" | "orb"; // Added "orb"
 
 export type Obstacle = {
   x: number;
@@ -106,16 +106,22 @@ class World {
   populate(intensity: number) {
     while (this.cursor < 190) {
       const r = this.rng();
-      
       const distanceScale = this.distance / 3000; 
       const diff = Math.min(1, distanceScale) * 0.4 + intensity * 0.6;
       const gap = Math.max(8, 24 - (intensity * 12) - (distanceScale * 6));
 
-      if (r < 0.15 && diff > 0.3) {
+      if (r < 0.15 && diff > 0.2) {
+        // YELLOW ORB: Floats high in the air
+        this.obstacles.push({ x: this.cursor, type: "orb", w: 1.2, h: 3.2 });
+        this.cursor += gap + 2;
+      } 
+      else if (r < 0.3 && diff > 0.3) {
+        // TALL WALL: Forces double jump
         this.obstacles.push({ x: this.cursor, type: "block", w: 2.5, h: 4.5 });
         this.cursor += gap + 5;
       } 
-      else if (r < 0.5) {
+      else if (r < 0.6) {
+        // SPIKE CLUSTERS
         const count = 1 + Math.floor(this.rng() * (diff > 0.5 ? 4 : 2));
         for (let i = 0; i < count; i++) {
           this.obstacles.push({ x: this.cursor + i * 1.5, type: "spike", w: 1.2, h: 1.5 });
@@ -123,12 +129,13 @@ class World {
         this.cursor += gap + count * 1.4;
       } 
       else {
-        const h = 1.6 + Math.round(this.rng() * 1) * 0.9;
-        this.obstacles.push({ x: this.cursor, type: "block", w: 3.2, h });
-        if (this.rng() < diff) {
-          this.obstacles.push({ x: this.cursor + 3.4, type: "spike", w: 1.2, h: 1.5 });
+        // BLOCK STAIRCASES AND PLATFORMS
+        const stairs = Math.floor(this.rng() * 3);
+        for (let i = 0; i <= stairs; i++) {
+          const h = 1.6 + (i * 0.8);
+          this.obstacles.push({ x: this.cursor + (i * 3.1), type: "block", w: 3.2, h });
         }
-        this.cursor += gap + 4;
+        this.cursor += gap + (stairs * 3.1) + 4;
       }
     }
   }
