@@ -148,7 +148,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
 
       <pointLight ref={rimLight} position={[2, 2, 4]} color={theme.grid} intensity={20} distance={30} />
 
-      <instancedMesh ref={spikes} args={[undefined, undefined, MAX_SPIKES]} castShadow>
+<instancedMesh ref={spikes} args={[null as any, null as any, MAX_SPIKES]} frustumCulled={false} castShadow>
         <coneGeometry args={[0.85, 1.5, 4]} />
         <meshStandardMaterial
           color={theme.spike}
@@ -160,7 +160,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
         />
       </instancedMesh>
 
-      <instancedMesh ref={blocks} args={[undefined, undefined, MAX_BLOCKS]} castShadow receiveShadow>
+<instancedMesh ref={blocks} args={[null as any, null as any, MAX_BLOCKS]} frustumCulled={false} castShadow receiveShadow>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
           color={theme.block}
@@ -171,7 +171,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
         />
       </instancedMesh>
 
-      <instancedMesh ref={pillars} args={[undefined, undefined, MAX_PILLARS]}>
+<instancedMesh ref={pillars} args={[null as any, null as any, MAX_PILLARS]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
           color={theme.bg}
