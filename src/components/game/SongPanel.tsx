@@ -36,6 +36,11 @@ export function SongPanel() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => {
+            // This stops the spacebar (and any other keys) from triggering the game!
+            e.stopPropagation();
+            e.nativeEvent.stopImmediatePropagation();
+          }}
           placeholder="Search any song or artist…"
           className="min-w-0 flex-1 rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/40"
         />
