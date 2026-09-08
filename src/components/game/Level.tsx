@@ -8,6 +8,7 @@ import { music } from "@/game/music";
 const MAX_SPIKES = 40;
 const MAX_BLOCKS = 30;
 const MAX_PILLARS = 26;
+const MAX_ORBS = 20;
 const dummy = new THREE.Object3D();
 
 function gridTexture(line: string, base: string) {
@@ -44,6 +45,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
   const pillars = useRef<THREE.InstancedMesh>(null);
   const groundMat = useRef<THREE.MeshStandardMaterial>(null);
   const rimLight = useRef<THREE.PointLight>(null);
+  const orbs = useRef<THREE.InstancedMesh>(null);
   const pillarOffsets = useRef<number[]>(
     Array.from({ length: MAX_PILLARS }, (_, i) => i * 9 + (i % 3) * 2),
   );
@@ -84,8 +86,10 @@ export function Level({ themeIndex }: { themeIndex: number }) {
     camera.lookAt(3.2, world.playerY * 0.45 + 1.6, 0);
 
     // instances
+// instances
     let si = 0;
     let bi = 0;
+    let oi = 0; // Orb counter
     for (const o of world.obstacles) {
       if (o.type === "spike" && si < MAX_SPIKES) {
         dummy.position.set(o.x, o.h / 2, 0);
@@ -99,6 +103,24 @@ export function Level({ themeIndex }: { themeIndex: number }) {
         dummy.scale.set(o.w, o.h, 2.6);
         dummy.updateMatrix();
         blocks.current?.setMatrixAt(bi++, dummy.matrix);
+      } else if (o.type === "orb" && oi < MAX_ORBS) {
+        dummy.position.set(o.x, o.h, 0);
+        dummy.rotation.set(0, 0, 0);
+        // Makes the orb pulse and throb as it approaches!
+        dummy.scale.setScalar(1 + Math.sin(t * 10 + o.x) * 0.15); 
+        dummy.updateMatrix();
+        orbs.current?.setMatrixAt(oi++, dummy.matrix);
+      }
+    }
+    dummy.scale.setScalar(0);
+    dummy.updateMatrix();
+    for (let i = si; i < MAX_SPIKES; i++) spikes.current?.setMatrixAt(i, dummy.matrix);
+    for (let i = bi; i < MAX_BLOCKS; i++) blocks.current?.setMatrixAt(i, dummy.matrix);
+    for (let i = oi; i < MAX_ORBS; i++) orbs.current?.setMatrixAt(i, dummy.matrix); // Clean up unused orbs
+    
+    if (spikes.current) spikes.current.instanceMatrix.needsUpdate = true;
+    if (blocks.current) blocks.current.instanceMatrix.needsUpdate = true;
+    if (orbs.current) orbs.current.instanceMatrix.needsUpdate = true; // Tell Three.js to render the orbs
       }
     }
     dummy.scale.setScalar(0);
@@ -171,6 +193,16 @@ export function Level({ themeIndex }: { themeIndex: number }) {
         />
       </instancedMesh>
 
+      <instancedMesh ref={orbs} args={[null as any, null as any, MAX_ORBS]} frustumCulled={false}>
+        <sphereGeometry args={[0.55, 16, 16]} />
+        <meshStandardMaterial
+          color="#ffff00"
+          emissive="#ffaa00"
+          emissiveIntensity={3}
+          roughness={0.1}
+        />
+      </instancedMesh>
+      
 <instancedMesh ref={pillars} args={[null as any, null as any, MAX_PILLARS]} frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
