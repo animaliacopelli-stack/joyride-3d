@@ -51,12 +51,17 @@ export function Player({ onDeath }: { onDeath: () => void }) {
       return;
     }
 
-    // vertical integration
-    if (world.jumpQueued && world.grounded) {
-      world.playerVy = JUMP_V;
-      world.grounded = false;
+    // --- VERTICAL INTEGRATION & JUMPING ---
+    if (world.jumpQueued) {
+      // Check if we haven't maxed out our 2 jumps yet
+      if (world.jumps < 2) {
+        world.playerVy = JUMP_V; // Apply upward velocity
+        world.jumps++;           // Add 1 to our jump count
+        world.grounded = false;
+      }
+      world.jumpQueued = false; // Always consume the key press
     }
-    world.jumpQueued = false;
+    
     world.playerVy += GRAVITY * delta;
     world.playerY += world.playerVy * delta;
 
@@ -70,7 +75,6 @@ export function Player({ onDeath }: { onDeath: () => void }) {
         if (bottom < o.h - 0.25) dead = true;
       } else {
         if (bottom < o.h - 0.3) {
-          // hit the wall face unless we're landing from above
           if (world.playerVy > 0 || bottom < o.h - 0.9) dead = true;
           else support = Math.max(support, o.h);
         } else {
@@ -83,12 +87,16 @@ export function Player({ onDeath }: { onDeath: () => void }) {
     if (world.playerY <= floor) {
       world.playerY = floor;
       if (world.playerVy < 0) world.playerVy = 0;
-      if (!world.grounded) world.rotation = Math.round(world.rotation / (Math.PI / 2)) * (Math.PI / 2);
+      
+      // --- LANDING ON THE GROUND ---
+      if (!world.grounded) {
+        world.rotation = Math.round(world.rotation / (Math.PI / 2)) * (Math.PI / 2);
+        world.jumps = 0; // RESET JUMPS! Now you can double jump again.
+      }
       world.grounded = true;
     } else {
       world.grounded = false;
     }
-
     if (!world.grounded) world.rotation -= delta * 7.5;
 
     g.position.set(0, world.playerY, 0);
