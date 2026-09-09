@@ -1,4 +1,4 @@
-export type ObstacleType = "spike" | "block" | "orb"; // Added "orb"
+export type ObstacleType = "spike" | "block" | "orb";
 
 export type Obstacle = {
   x: number;
@@ -61,6 +61,25 @@ export const THEMES: Theme[] = [
   },
 ];
 
+export type WorldConfig = {
+  baseSpeed: number;
+  maxSpeed: number;
+  /** 0..1 — how tightly packed the obstacles are. */
+  density: number;
+  /** metres of distance needed to gain 1 unit of speed. */
+  ramp: number;
+};
+
+export const DEFAULT_CONFIG: WorldConfig = {
+  baseSpeed: 16,
+  maxSpeed: 34,
+  density: 0.5,
+  ramp: 150,
+};
+
+/** How far ahead of the player new obstacles appear. */
+const SPAWN_X = 84;
+
 function mulberry32(seed: number) {
   let a = seed >>> 0;
   return () => {
@@ -81,13 +100,15 @@ class World {
   groundHeight = 0;
   rotation = 0;
   distance = 0;
-  speed = 17;
+  speed = 16;
   jumpQueued = false;
-  cursor = 40;
   rng = mulberry32(1);
   shake = 0;
+  cfg: WorldConfig = { ...DEFAULT_CONFIG };
+  lastSpawnDist = -40;
 
-  reset(seed?: number) {
+  reset(seed?: number, cfg?: Partial<WorldConfig>) {
+    this.cfg = { ...DEFAULT_CONFIG, ...cfg };
     this.obstacles = [];
     this.playerY = 0.6;
     this.playerVy = 0;
@@ -96,53 +117,69 @@ class World {
     this.groundHeight = 0;
     this.rotation = 0;
     this.distance = 0;
-    this.speed = 17;
+    this.speed = this.cfg.baseSpeed;
     this.jumpQueued = false;
-    this.cursor = 32;
     this.shake = 0;
+    this.lastSpawnDist = -30;
     this.rng = mulberry32(seed ?? Date.now());
   }
 
-  populate(intensity: number) {
-    while (this.cursor < 190) {
-      const r = this.rng();
-      const distanceScale = this.distance / 3000; 
-      const diff = Math.min(1, distanceScale) * 0.4 + intensity * 0.6;
-      const gap = Math.max(8, 24 - (intensity * 12) - (distanceScale * 6));
+  /** One simulation step. `intensity` is 0..1 song loudness, `beat` fires on each detected beat. */
+  step(delta: number, intensity: number, beat: boolean) {
+    this.speed = Math.min(this.cfg.maxSpeed, this.cfg.baseSpeed + this.distance / this.cfg.ramp);
+    this.advance(this.speed * delta);
+    this.maybeSpawn(intensity, beat);
+  }
 
-      if (r < 0.15 && diff > 0.2) {
-        // YELLOW ORB: Floats high in the air
-        this.obstacles.push({ x: this.cursor, type: "orb", w: 1.2, h: 3.2 });
-        this.cursor += gap + 2;
-      } 
-      else if (r < 0.3 && diff > 0.3) {
-        // TALL WALL: Forces double jump
-        this.obstacles.push({ x: this.cursor, type: "block", w: 2.5, h: 4.5 });
-        this.cursor += gap + 5;
-      } 
-      else if (r < 0.6) {
-        // SPIKE CLUSTERS
-        const count = 1 + Math.floor(this.rng() * (diff > 0.5 ? 4 : 2));
-        for (let i = 0; i < count; i++) {
-          this.obstacles.push({ x: this.cursor + i * 1.5, type: "spike", w: 1.2, h: 1.5 });
-        }
-        this.cursor += gap + count * 1.4;
-      } 
-      else {
-        // BLOCK STAIRCASES AND PLATFORMS
-        const stairs = Math.floor(this.rng() * 3);
-        for (let i = 0; i <= stairs; i++) {
-          const h = 1.6 + (i * 0.8);
-          this.obstacles.push({ x: this.cursor + (i * 3.1), type: "block", w: 3.2, h });
-        }
-        this.cursor += gap + (stairs * 3.1) + 4;
+  /** Obstacles are placed on the beat of the song, never on a fixed grid. */
+  maybeSpawn(intensity: number, beat: boolean) {
+    const since = this.distance - this.lastSpawnDist;
+    // Faster runs need more room between hazards so they stay clearable.
+    const minGap = Math.max(7, this.speed * (0.58 - this.cfg.density * 0.16));
+    const forced = since > minGap * 3.4; // keeps the level alive during quiet passages
+    if (!forced && (!beat || since < minGap)) return;
+    this.lastSpawnDist = this.distance;
+    this.spawn(intensity);
+  }
+
+  private spawn(intensity: number) {
+    const progress = Math.min(1, this.distance / 2600);
+    const heat = Math.min(1, intensity * 0.65 + progress * 0.35 + this.cfg.density * 0.25);
+    const r = this.rng();
+
+    if (r < 0.16 && heat > 0.25) {
+      // Yellow ring: bounce pad in the air, with a hazard right after it.
+      this.obstacles.push({ x: SPAWN_X, type: "orb", w: 1.2, h: 3.3 });
+      const n = 1 + Math.floor(this.rng() * (heat > 0.6 ? 3 : 2));
+      for (let i = 0; i < n; i++) {
+        this.obstacles.push({ x: SPAWN_X + 5.5 + i * 1.5, type: "spike", w: 1.2, h: 1.5 });
       }
+      return;
+    }
+
+    if (r < 0.3 && heat > 0.35) {
+      // Tall wall — needs a double jump or an orb boost.
+      this.obstacles.push({ x: SPAWN_X, type: "block", w: 2.5, h: 3.6 + heat * 1.4 });
+      return;
+    }
+
+    if (r < 0.62) {
+      const count = 1 + Math.floor(this.rng() * (heat > 0.55 ? 4 : 2));
+      for (let i = 0; i < count; i++) {
+        this.obstacles.push({ x: SPAWN_X + i * 1.5, type: "spike", w: 1.2, h: 1.5 });
+      }
+      return;
+    }
+
+    // Staircase / platform run.
+    const stairs = Math.floor(this.rng() * 3);
+    for (let i = 0; i <= stairs; i++) {
+      this.obstacles.push({ x: SPAWN_X + i * 3.1, type: "block", w: 3.2, h: 1.6 + i * 0.8 });
     }
   }
 
   advance(dx: number) {
     this.distance += dx;
-    this.cursor -= dx;
     for (const o of this.obstacles) o.x -= dx;
     if (this.obstacles.length && this.obstacles[0]!.x < -25) {
       this.obstacles = this.obstacles.filter((o) => o.x > -25);
