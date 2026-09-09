@@ -2,28 +2,34 @@ import { Environment, Lightformer } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { Level } from "./Level";
 import { Player } from "./Player";
+import { Ghosts } from "./Ghosts";
 import { useGameStore } from "@/game/store";
+import { levelById } from "@/game/levels";
 import { world, THEMES } from "@/game/world";
 import { music } from "@/game/music";
 
 export function Scene() {
-  const [themeIndex, setThemeIndex] = useState(0);
+  const levelId = useGameStore((s) => s.levelId);
+  const def = levelById(levelId);
+  const [rotating, setRotating] = useState(0);
   const state = useGameStore((s) => s.state);
   const deadRef = useRef(false);
+  const themeIndex = def.rotateTheme ? rotating : def.themeIndex;
   const theme = THEMES[themeIndex % THEMES.length]!;
 
   useEffect(() => {
     if (state === "playing") deadRef.current = false;
   }, [state]);
 
-  // rotate theme with progress
+  // endless mode drifts through themes as you survive
   useEffect(() => {
+    if (!def.rotateTheme) return;
     const id = setInterval(() => {
       const next = Math.floor(world.distance / 700) % THEMES.length;
-      setThemeIndex((prev) => (prev === next ? prev : next));
+      setRotating((prev) => (prev === next ? prev : next));
     }, 500);
     return () => clearInterval(id);
-  }, []);
+  }, [def.rotateTheme]);
 
   const handleDeath = () => {
     if (deadRef.current) return;
@@ -61,6 +67,7 @@ export function Scene() {
         />
       </Environment>
       <Level themeIndex={themeIndex} />
+      <Ghosts />
       <Player onDeath={handleDeath} />
     </>
   );
