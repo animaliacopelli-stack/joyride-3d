@@ -1,0 +1,158 @@
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useGameStore, type SkinId } from "./store";
+
+export type Peer = {
+  id: string;
+  name: string;
+  skin: SkinId;
+  color: string;
+  y: number;
+  dist: number;
+  alive: boolean;
+  t: number;
+};
+
+export type RaceStart = { seed: number; levelId: string; at: number };
+
+const SKIN_COLORS: Record<SkinId, string> = {
+  smiley: "#ffd23f",
+  cube: "#4de1c1",
+  prism: "#ff5f9e",
+};
+
+class Multiplayer {
+  private channel: RealtimeChannel | null = null;
+  private id = Math.random().toString(36).slice(2, 10);
+  private lastSent = 0;
+  peers = new Map<string, Peer>();
+  onStart: ((s: RaceStart) => void) | null = null;
+
+  get myId() {
+    return this.id;
+  }
+  get inRoom() {
+    return this.channel !== null;
+  }
+
+  async join(code: string) {
+    await this.leave();
+    const store = useGameStore.getState();
+    store.setRoom(code, "joining");
+
+    const channel = supabase.channel(`race:${code}`, {
+      config: { broadcast: { self: false }, presence: { key: this.id } },
+    });
+    this.channel = channel;
+
+    channel.on("broadcast", { event: "pos" }, ({ payload }) => {
+      const p = payload as Peer;
+      if (!p?.id || p.id === this.id) return;
+      this.peers.set(p.id, { ...p, color: SKIN_COLORS[p.skin] ?? "#ffffff", t: performance.now() });
+    });
+
+    channel.on("broadcast", { event: "start" }, ({ payload }) => {
+      this.onStart?.(payload as RaceStart);
+    });
+
+    channel.on("presence", { event: "sync" }, () => {
+      const state = channel.presenceState<{ name: string; skin: SkinId; best: number }>();
+      const roster = Object.entries(state).map(([key, metas]) => {
+        const m = metas[0]!;
+        return {
+          id: key,
+          name: m.name ?? "Racer",
+          skin: (m.skin ?? "smiley") as SkinId,
+          best: m.best ?? 0,
+          alive: true,
+        };
+      });
+      useGameStore.getState().setRoster(roster);
+      for (const id of [...this.peers.keys()]) if (!state[id]) this.peers.delete(id);
+    });
+
+    await new Promise<void>((resolve) => {
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          const s = useGameStore.getState();
+          void channel.track({ name: s.playerName, skin: s.skin, best: s.best });
+          s.setRoom(code, "connected");
+          resolve();
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          useGameStore.getState().setRoom(code, "error");
+          resolve();
+        }
+      });
+    });
+  }
+
+  updatePresence() {
+    if (!this.channel) return;
+    const s = useGameStore.getState();
+    void this.channel.track({ name: s.playerName, skin: s.skin, best: s.best });
+  }
+
+  /** Throttled position broadcast (about 15/s). */
+  send(dist: number, y: number, alive: boolean) {
+    if (!this.channel) return;
+    const now = performance.now();
+    if (now - this.lastSent < 66) return;
+    this.lastSent = now;
+    const s = useGameStore.getState();
+    void this.channel.send({
+      type: "broadcast",
+      event: "pos",
+      payload: {
+        id: this.id,
+        name: s.playerName,
+        skin: s.skin,
+        dist: Math.round(dist * 10) / 10,
+        y: Math.round(y * 100) / 100,
+        alive,
+      },
+    });
+  }
+
+  startRace(seed: number, levelId: string) {
+    const payload: RaceStart = { seed, levelId, at: Date.now() + 3200 };
+    void this.channel?.send({ type: "broadcast", event: "start", payload });
+    this.onStart?.(payload);
+  }
+
+  list(): Peer[] {
+    const now = performance.now();
+    const out: Peer[] = [];
+    for (const [id, p] of this.peers) {
+      if (now - p.t > 4000) this.peers.delete(id);
+      else out.push(p);
+    }
+    return out;
+  }
+
+  async leave() {
+    if (this.channel) {
+      await supabase.removeChannel(this.channel);
+      this.channel = null;
+    }
+    this.peers.clear();
+    const s = useGameStore.getState();
+    s.setRoster([]);
+    s.setRoom(null, "idle");
+  }
+}
+
+export const multiplayer = new Multiplayer();
+
+export function randomRoomCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
+
+export function seedFromCode(code: string) {
+  let h = 2166136261;
+  for (let i = 0; i < code.length; i++) {
+    h ^= code.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
