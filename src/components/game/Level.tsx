@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { world, THEMES } from "@/game/world";
 import { useGameStore } from "@/game/store";
 import { music } from "@/game/music";
+import { multiplayer } from "@/game/multiplayer";
 
 const MAX_SPIKES = 40;
 const MAX_BLOCKS = 30;
@@ -60,14 +61,12 @@ export function Level({ themeIndex }: { themeIndex: number }) {
     const store = useGameStore.getState();
 
     if (store.state === "playing") {
-      world.speed = Math.min(30, 17 + world.distance / 320);
-      const dx = world.speed * delta;
-      world.advance(dx);
-      world.populate(level);
+      world.step(delta, level, beat);
       store.setScore(Math.floor(world.distance));
+      if (multiplayer.inRoom) multiplayer.send(world.distance, world.playerY, true);
     } else if (store.state === "menu") {
       world.advance(6 * delta);
-      world.populate(level);
+      world.maybeSpawn(level, beat);
     }
 
     // scrolling ground
