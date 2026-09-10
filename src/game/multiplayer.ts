@@ -58,7 +58,11 @@ class Multiplayer {
     channel.on("broadcast", { event: "pos" }, ({ payload }) => {
       const p = payload as Peer;
       if (!p?.id || p.id === this.id) return;
-      this.peers.set(p.id, { ...p, color: SKIN_COLORS[p.skin] ?? "#ffffff", t: performance.now() });
+      const now = performance.now();
+      const prev = this.peers.get(p.id);
+      const dt = prev ? (now - prev.t) / 1000 : 0;
+      const vd = prev && dt > 0.01 && dt < 0.6 ? Math.max(-60, Math.min(60, (p.dist - prev.dist) / dt)) : (prev?.vd ?? 0);
+      this.peers.set(p.id, { ...p, color: SKIN_COLORS[p.skin] ?? "#ffffff", t: now, vd });
     });
 
     channel.on("broadcast", { event: "start" }, ({ payload }) => {
