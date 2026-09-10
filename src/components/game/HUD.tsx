@@ -93,6 +93,8 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
 
               {state === "dead" && lastRun && <RunSummary lastRun={lastRun} levelName={def.name} onShare={share} shared={shared} />}
 
+              {roomCode && roster.length > 1 && <MatchOverview />}
+
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={onStart}
