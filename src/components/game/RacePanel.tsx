@@ -43,7 +43,7 @@ export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
             <button
               disabled={code.length < 4 || roomStatus === "joining"}
               onClick={() => void multiplayer.join(code)}
-              className="rounded-lg bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-40"
+              className="rounded-lg bg-ink px-4 py-2 text-sm font-bold text-ink-inverse disabled:opacity-40"
             >
               Join
             </button>
@@ -88,7 +88,7 @@ export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
           <div className="flex gap-2">
             <button
               onClick={onStartRace}
-              className="flex-1 rounded-lg bg-ink py-2 text-sm font-bold text-background transition hover:opacity-90"
+              className="flex-1 rounded-lg bg-ink py-2 text-sm font-bold text-ink-inverse transition hover:opacity-90"
             >
               Start race for everyone
             </button>

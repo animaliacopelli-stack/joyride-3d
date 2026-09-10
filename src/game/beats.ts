@@ -170,7 +170,7 @@ export type BeatGrid = {
 
 export function gridFromAnalysis(
   a: BeatAnalysis | null,
-  override: { bpm?: number; offset?: number } | null,
+  override: { bpm?: number | undefined; offset?: number | undefined } | null,
   fallbackBpm: number,
   duration: number,
 ): BeatGrid {

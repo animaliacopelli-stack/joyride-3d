@@ -21,7 +21,7 @@ export type RoomPlayer = {
   alive: boolean;
 };
 
-export type TempoOverride = { bpm?: number; offset?: number };
+export type TempoOverride = { bpm?: number | undefined; offset?: number | undefined };
 
 export type LastRun = {
   levelId: string;

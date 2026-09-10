@@ -29,15 +29,13 @@ export async function submitRun(input: {
     _player_name: input.playerName,
     _level_id: input.levelId,
     _distance: Math.floor(input.distance),
-    _track_title: input.trackTitle ?? undefined,
-    _track_artist: input.trackArtist ?? undefined,
+    ...(input.trackTitle ? { _track_title: input.trackTitle } : {}),
+    ...(input.trackArtist ? { _track_artist: input.trackArtist } : {}),
   });
   if (error) throw error;
-  const { data: rank } = await supabase.rpc("get_player_rank", {
-    _level_id: input.levelId,
-    _player_id: input.playerId,
-  });
-  return { shareCode: code as string, rank: (rank as number | null) ?? null };
+  const shareCode = code as string;
+  const { data: rank } = await supabase.rpc("get_run_rank", { _share_code: shareCode });
+  return { shareCode, rank: (rank as number | null) ?? null };
 }
 
 export function shareUrl(code: string) {
