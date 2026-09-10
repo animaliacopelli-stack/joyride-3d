@@ -111,9 +111,18 @@ class Multiplayer {
       const dt = prev ? (now - prev.t) / 1000 : 0;
       const vd = prev && dt > 0.01 && dt < 0.6 ? Math.max(-60, Math.min(60, (p.dist - prev.dist) / dt)) : (prev?.vd ?? 0);
       this.peers.set(p.id, { ...p, color: skinById(p.skin).color, t: now, vd });
+      this.record(p.id, p.name, skinById(p.skin).color, p.dist, !p.alive);
+    });
+
+    channel.on("broadcast", { event: "fin" }, ({ payload }) => {
+      const p = payload as { id: string; name: string; skin: SkinId; dist: number };
+      if (!p?.id || p.id === this.id) return;
+      this.record(p.id, p.name, skinById(p.skin).color, p.dist, true);
     });
 
     channel.on("broadcast", { event: "start" }, ({ payload }) => {
+      this.results.clear();
+      this.raceActive = true;
       this.onStart?.(payload as RaceStart);
     });
 
