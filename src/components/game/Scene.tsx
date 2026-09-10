@@ -44,8 +44,9 @@ export function Scene() {
   return (
     <>
       <color attach="background" args={[theme.bg]} />
-      <fog attach="fog" args={[theme.fog, 28, 100]} />
-      <Stars radius={140} depth={80} count={1800} factor={3.5} saturation={0.4} fade speed={0.6} />
+      <fog attach="fog" args={[theme.fog, 34, 120]} />
+      <Sky theme={theme} />
+      <Stars radius={150} depth={90} count={2400} factor={3.2} saturation={0.5} fade speed={0.5} />
       <hemisphereLight args={[theme.light, theme.ground, 0.75]} />
       <ambientLight intensity={0.3} />
       <directionalLight
