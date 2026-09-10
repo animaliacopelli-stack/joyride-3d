@@ -12,13 +12,22 @@ export const adsConfigured = () => ADSENSE_CLIENT.startsWith("ca-pub-") && ADSEN
 
 let loading: Promise<void> | null = null;
 
-/** Loads the AdSense library once, on demand. */
+/** Uses the verification script in the document head, with a fallback for older deployments. */
 export function loadAdSense(): Promise<void> {
   if (typeof document === "undefined" || !adsConfigured()) return Promise.resolve();
   if (loading) return loading;
   loading = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>("script[data-varity-ads]");
-    if (existing) return resolve();
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]`,
+    );
+    if (existing) {
+      if ((window as Window & { adsbygoogle?: unknown[] }).adsbygoogle) resolve();
+      else {
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener("error", () => reject(new Error("adsense blocked")), { once: true });
+      }
+      return;
+    }
     const s = document.createElement("script");
     s.async = true;
     s.crossOrigin = "anonymous";
