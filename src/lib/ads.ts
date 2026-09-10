@@ -1,5 +1,5 @@
 /**
- * Google AdSense settings for Varity Dash.
+ * Google AdSense settings for Verity Dash.
  *
  * Paste the publisher id from your AdSense account (looks like "ca-pub-1234567890123456")
  * and the ad unit id you create there (a number like "1234567890").

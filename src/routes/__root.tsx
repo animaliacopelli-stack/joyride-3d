@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Varity Dash" },
+      { title: "Verity Dash" },
       { name: "description", content: "A 3D rhythm runner that builds its level from any song." },
-      { name: "author", content: "Varity Dash" },
-      { property: "og:title", content: "Varity Dash" },
+      { name: "author", content: "Verity Dash" },
+      { property: "og:title", content: "Verity Dash" },
       { property: "og:description", content: "A 3D rhythm runner that builds its level from any song." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -97,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800;900&family=Space+Grotesk:wght@400;500;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
     scripts: [
       {
