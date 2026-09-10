@@ -119,6 +119,8 @@ export function TempoPanel() {
         </Pill>
         <span className="mx-1 h-6 w-px bg-glass-border" />
         <Pill onClick={() => update({ offset: Math.max(0, (offsetMs - 20) / 1000) })}>beat −20ms</Pill>
+        <Pill onClick={() => update({ offset: Math.max(0, (offsetMs - 5) / 1000) })}>−5ms</Pill>
+        <Pill onClick={() => update({ offset: (offsetMs + 5) / 1000 })}>+5ms</Pill>
         <Pill onClick={() => update({ offset: (offsetMs + 20) / 1000 })}>beat +20ms</Pill>
         <Pill onClick={syncNow} disabled={!music.playing}>
           Beat is now

@@ -252,6 +252,7 @@ class World {
     if (this.mode === "run" && this.distance + x < 45) chance = 0; // breathing room at the start
     if (r2 > chance) return;
 
+    const period = 60 / grid.bpm;
     const progress = Math.min(1, this.distance / 2600);
     const heat = Math.min(1, energy * 0.5 + progress * 0.3 + density * 0.35);
     const speedThere = this.speedAt(this.distance + x);
@@ -264,11 +265,12 @@ class World {
       const tNext = this.beatTime(k + 1, grid);
       this.obstacles.push({ x, type: "orb", w: 1.2, h: 3.3, t, dx: 0 });
       const n = 1 + Math.floor(this.rng() * (heat > 0.6 ? 3 : 2));
+      // each spike sits on a half-beat subdivision, so the whole cluster is on-grid
       for (let i = 0; i < n; i++) {
-        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t: tNext, dx: i * 1.5 });
+        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t: tNext + i * period * 0.25, dx: 0 });
       }
       width = n * 1.5;
-      endT = tNext;
+      endT = tNext + (n - 1) * period * 0.25;
       this.nextBeat = Math.max(this.nextBeat, k + 2);
     } else if (r < 0.28 && heat > 0.4) {
       // Tall wall — needs a double jump or an orb boost.
@@ -276,10 +278,13 @@ class World {
       width = 2.5;
     } else if (r < 0.64) {
       const count = 1 + Math.floor(this.rng() * (heat > 0.55 ? 3 : 2));
+      // spikes land on successive half-beats instead of a fixed metre gap
+      const sub = period * 0.25;
       for (let i = 0; i < count; i++) {
-        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t, dx: i * 1.5 });
+        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t: t + i * sub, dx: 0 });
       }
       width = count * 1.5;
+      endT = t + (count - 1) * sub;
     } else {
       // Staircase / platform run.
       const stairs = Math.floor(this.rng() * 3);
