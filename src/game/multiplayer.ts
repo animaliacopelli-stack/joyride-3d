@@ -100,11 +100,11 @@ class Multiplayer {
     void this.channel.track({ name: s.playerName, skin: s.skin, best: s.best });
   }
 
-  /** Throttled position broadcast (about 15/s). */
+  /** Throttled position broadcast (about 25/s). */
   send(dist: number, y: number, alive: boolean) {
     if (!this.channel) return;
     const now = performance.now();
-    if (now - this.lastSent < 66) return;
+    if (now - this.lastSent < 40) return;
     this.lastSent = now;
     const s = useGameStore.getState();
     void this.channel.send({
