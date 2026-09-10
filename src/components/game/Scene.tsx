@@ -1,5 +1,6 @@
 import { Environment, Lightformer, Stars } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
+import { Sky } from "./Sky";
 import { Level } from "./Level";
 import { Player } from "./Player";
 import { Ghosts } from "./Ghosts";
