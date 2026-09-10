@@ -190,6 +190,8 @@ class Multiplayer {
     const track = s.track && s.track.source === "apple" ? s.track : null;
     const tempo = track ? (s.tempoByTrack[track.id] ?? null) : null;
     const payload: RaceStart = { seed, levelId, at: Date.now() + 3500, track, tempo };
+    this.results.clear();
+    this.raceActive = true;
     void this.channel?.send({ type: "broadcast", event: "start", payload });
     this.onStart?.(payload);
   }
