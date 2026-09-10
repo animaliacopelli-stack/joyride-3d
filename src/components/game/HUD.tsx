@@ -8,6 +8,7 @@ import { SongPanel } from "./SongPanel";
 import { LevelSelect } from "./LevelSelect";
 import { RacePanel } from "./RacePanel";
 import { RaceBar } from "./RaceBar";
+import { MatchOverview } from "./MatchOverview";
 import { TempoPanel } from "./TempoPanel";
 import { Leaderboard } from "./Leaderboard";
 import { Pill } from "./ui";
@@ -91,6 +92,8 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
               </div>
 
               {state === "dead" && lastRun && <RunSummary lastRun={lastRun} levelName={def.name} onShare={share} shared={shared} />}
+
+              {roomCode && roster.length > 1 && <MatchOverview />}
 
               <div className="flex flex-wrap items-center gap-3">
                 <button

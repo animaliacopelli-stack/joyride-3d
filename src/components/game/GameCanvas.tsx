@@ -51,6 +51,8 @@ export function GameCanvas() {
       useGameStore.subscribe((s, prev) => {
         if (!(s.state === "dead" && prev.state === "playing")) return;
         const distance = s.score;
+        // tell the room this racer is done so everyone's match overview updates
+        if (multiplayer.inRoom) multiplayer.finish(distance);
         const levelId = s.levelId;
         const previousBest = prev.bestByLevel[levelId] ?? 0;
         const personalBest = distance > previousBest;

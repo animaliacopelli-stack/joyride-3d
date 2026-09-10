@@ -28,12 +28,63 @@ export type RaceStart = {
 
 
 
+export type Standing = {
+  id: string;
+  name: string;
+  color: string;
+  dist: number;
+  finished: boolean;
+  me: boolean;
+};
+
 class Multiplayer {
   private channel: RealtimeChannel | null = null;
   private id = Math.random().toString(36).slice(2, 10);
   private lastSent = 0;
   peers = new Map<string, Peer>();
+  /** last race's result per racer — kept after death so everyone sees the match overview */
+  results = new Map<string, { name: string; color: string; dist: number; finished: boolean }>();
+  raceActive = false;
   onStart: ((s: RaceStart) => void) | null = null;
+
+  private record(id: string, name: string, color: string, dist: number, finished: boolean) {
+    const prev = this.results.get(id);
+    this.results.set(id, {
+      name,
+      color,
+      dist: Math.max(prev?.dist ?? 0, dist),
+      finished: finished || (prev?.finished ?? false),
+    });
+  }
+
+  /** Everyone's standings for the current/last race, best distance first. */
+  standings(): Standing[] {
+    const s = useGameStore.getState();
+    const out: Standing[] = [];
+    for (const [id, r] of this.results) out.push({ id, ...r, me: id === this.id });
+    if (!this.results.has(this.id))
+      out.push({
+        id: this.id,
+        name: s.playerName || "You",
+        color: skinById(s.skin).color,
+        dist: s.score,
+        finished: s.state !== "playing",
+        me: true,
+      });
+    return out.sort((a, b) => b.dist - a.dist);
+  }
+
+  /** Broadcast the final distance so the whole room can rank the match. */
+  finish(dist: number) {
+    const s = useGameStore.getState();
+    this.record(this.id, s.playerName || "You", skinById(s.skin).color, dist, true);
+    if (!this.channel) return;
+    void this.channel.send({
+      type: "broadcast",
+      event: "fin",
+      payload: { id: this.id, name: s.playerName || "Racer", skin: s.skin, dist },
+    });
+  }
 
   get myId() {
     return this.id;
@@ -60,9 +111,18 @@ class Multiplayer {
       const dt = prev ? (now - prev.t) / 1000 : 0;
       const vd = prev && dt > 0.01 && dt < 0.6 ? Math.max(-60, Math.min(60, (p.dist - prev.dist) / dt)) : (prev?.vd ?? 0);
       this.peers.set(p.id, { ...p, color: skinById(p.skin).color, t: now, vd });
+      this.record(p.id, p.name, skinById(p.skin).color, p.dist, !p.alive);
+    });
+
+    channel.on("broadcast", { event: "fin" }, ({ payload }) => {
+      const p = payload as { id: string; name: string; skin: SkinId; dist: number };
+      if (!p?.id || p.id === this.id) return;
+      this.record(p.id, p.name, skinById(p.skin).color, p.dist, true);
     });
 
     channel.on("broadcast", { event: "start" }, ({ payload }) => {
+      this.results.clear();
+      this.raceActive = true;
       this.onStart?.(payload as RaceStart);
     });
 
@@ -130,6 +190,8 @@ class Multiplayer {
     const track = s.track && s.track.source === "apple" ? s.track : null;
     const tempo = track ? (s.tempoByTrack[track.id] ?? null) : null;
     const payload: RaceStart = { seed, levelId, at: Date.now() + 3500, track, tempo };
+    this.results.clear();
+    this.raceActive = true;
     void this.channel?.send({ type: "broadcast", event: "start", payload });
     this.onStart?.(payload);
   }
@@ -150,6 +212,8 @@ class Multiplayer {
       this.channel = null;
     }
     this.peers.clear();
+    this.results.clear();
+    this.raceActive = false;
     const s = useGameStore.getState();
     s.setRoster([]);
     s.setRoom(null, "idle");
