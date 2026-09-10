@@ -1,8 +1,10 @@
-import { Environment, Lightformer } from "@react-three/drei";
+import { Environment, Lightformer, Stars } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import { Level } from "./Level";
 import { Player } from "./Player";
 import { Ghosts } from "./Ghosts";
+import { Particles } from "./Particles";
+import { Effects } from "./Effects";
 import { useGameStore } from "@/game/store";
 import { levelById } from "@/game/levels";
 import { world, THEMES } from "@/game/world";
@@ -41,9 +43,10 @@ export function Scene() {
   return (
     <>
       <color attach="background" args={[theme.bg]} />
-      <fog attach="fog" args={[theme.fog, 26, 95]} />
+      <fog attach="fog" args={[theme.fog, 28, 100]} />
+      <Stars radius={140} depth={80} count={1800} factor={3.5} saturation={0.4} fade speed={0.6} />
       <hemisphereLight args={[theme.light, theme.ground, 0.75]} />
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={0.3} />
       <directionalLight
         position={[8, 18, 10]}
         intensity={1.6}
@@ -68,7 +71,9 @@ export function Scene() {
       </Environment>
       <Level themeIndex={themeIndex} />
       <Ghosts />
+      <Particles />
       <Player onDeath={handleDeath} />
+      <Effects />
     </>
   );
 }
