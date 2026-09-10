@@ -265,11 +265,12 @@ class World {
       const tNext = this.beatTime(k + 1, grid);
       this.obstacles.push({ x, type: "orb", w: 1.2, h: 3.3, t, dx: 0 });
       const n = 1 + Math.floor(this.rng() * (heat > 0.6 ? 3 : 2));
+      // each spike sits on a half-beat subdivision, so the whole cluster is on-grid
       for (let i = 0; i < n; i++) {
-        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t: tNext, dx: i * 1.5 });
+        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t: tNext + i * period * 0.5, dx: 0 });
       }
       width = n * 1.5;
-      endT = tNext;
+      endT = tNext + (n - 1) * period * 0.5;
       this.nextBeat = Math.max(this.nextBeat, k + 2);
     } else if (r < 0.28 && heat > 0.4) {
       // Tall wall — needs a double jump or an orb boost.
