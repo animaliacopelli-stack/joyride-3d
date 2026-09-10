@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, Music2, Loader2, Upload, Trash2, Play, Check } from "lucide-react";
 import { searchTracks, type Track } from "@/lib/music.functions";
 import { addLocalTrack, listLocalTracks, removeLocalTrack } from "@/game/library";
