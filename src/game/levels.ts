@@ -5,10 +5,12 @@ export type LevelDef = {
   name: string;
   subtitle: string;
   themeIndex: number;
-  /** null = the theme rotates as you survive. */
+  /** true = the theme rotates as you survive. */
   rotateTheme: boolean;
   difficulty: "Easy" | "Normal" | "Hard" | "Insane";
   seed: number;
+  /** tempo used when no song is playing */
+  bpm: number;
   config: WorldConfig;
 };
 
@@ -21,6 +23,7 @@ export const LEVELS: LevelDef[] = [
     rotateTheme: false,
     difficulty: "Easy",
     seed: 1011,
+    bpm: 104,
     config: { baseSpeed: 14, maxSpeed: 22, density: 0.25, ramp: 220 },
   },
   {
@@ -31,6 +34,7 @@ export const LEVELS: LevelDef[] = [
     rotateTheme: false,
     difficulty: "Normal",
     seed: 2022,
+    bpm: 122,
     config: { baseSpeed: 17, maxSpeed: 28, density: 0.5, ramp: 170 },
   },
   {
@@ -41,6 +45,7 @@ export const LEVELS: LevelDef[] = [
     rotateTheme: false,
     difficulty: "Hard",
     seed: 3033,
+    bpm: 136,
     config: { baseSpeed: 20, maxSpeed: 33, density: 0.72, ramp: 140 },
   },
   {
@@ -51,6 +56,7 @@ export const LEVELS: LevelDef[] = [
     rotateTheme: false,
     difficulty: "Insane",
     seed: 4044,
+    bpm: 150,
     config: { baseSpeed: 23, maxSpeed: 40, density: 0.9, ramp: 110 },
   },
   {
@@ -61,6 +67,7 @@ export const LEVELS: LevelDef[] = [
     rotateTheme: true,
     difficulty: "Normal",
     seed: 0,
+    bpm: 128,
     config: { baseSpeed: 16, maxSpeed: 42, density: 0.55, ramp: 150 },
   },
 ];

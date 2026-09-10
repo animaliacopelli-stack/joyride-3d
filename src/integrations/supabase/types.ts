@@ -14,13 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      runs: {
+        Row: {
+          created_at: string
+          distance: number
+          id: string
+          level_id: string
+          player_id: string
+          player_name: string
+          share_code: string
+          track_artist: string | null
+          track_title: string | null
+        }
+        Insert: {
+          created_at?: string
+          distance: number
+          id?: string
+          level_id: string
+          player_id: string
+          player_name: string
+          share_code: string
+          track_artist?: string | null
+          track_title?: string | null
+        }
+        Update: {
+          created_at?: string
+          distance?: number
+          id?: string
+          level_id?: string
+          player_id?: string
+          player_name?: string
+          share_code?: string
+          track_artist?: string | null
+          track_title?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_leaderboard: {
+        Args: { _level_id: string; _limit?: number }
+        Returns: {
+          created_at: string
+          distance: number
+          player_name: string
+          rank: number
+          share_code: string
+          track_artist: string
+          track_title: string
+        }[]
+      }
+      get_player_rank: {
+        Args: { _level_id: string; _player_id: string }
+        Returns: number
+      }
+      get_run: {
+        Args: { _share_code: string }
+        Returns: {
+          created_at: string
+          distance: number
+          level_id: string
+          player_name: string
+          share_code: string
+          track_artist: string
+          track_title: string
+        }[]
+      }
+      submit_run: {
+        Args: {
+          _distance: number
+          _level_id: string
+          _player_id: string
+          _player_name: string
+          _track_artist?: string
+          _track_title?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
