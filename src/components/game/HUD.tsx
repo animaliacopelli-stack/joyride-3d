@@ -7,6 +7,7 @@ import { shareRun } from "@/lib/leaderboard";
 import { SongPanel } from "./SongPanel";
 import { LevelSelect } from "./LevelSelect";
 import { RacePanel } from "./RacePanel";
+import { RaceBar } from "./RaceBar";
 import { TempoPanel } from "./TempoPanel";
 import { Leaderboard } from "./Leaderboard";
 import { Pill } from "./ui";
@@ -53,19 +54,8 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
         <Stat label="Best" value={`${bestByLevel[levelId] ?? best} m`} align="right" />
       </div>
 
-      {/* live standings */}
-      {roomCode && state === "playing" && roster.length > 1 && (
-        <div className="absolute left-5 top-28 space-y-1 rounded-xl border border-glass-border bg-glass px-3 py-2 backdrop-blur-md">
-          {multiplayer
-            .list()
-            .slice(0, 5)
-            .map((p) => (
-              <p key={p.id} className="font-mono text-xs text-ink-muted">
-                <span style={{ color: p.color }}>●</span> {p.name} {Math.round(p.dist)} m
-              </p>
-            ))}
-        </div>
-      )}
+      {/* live race bar */}
+      {roomCode && state === "playing" && roster.length > 1 && <RaceBar />}
 
       {state === "playing" && track && (
         <p className="absolute bottom-5 left-0 right-0 text-center text-xs text-ink-muted">
