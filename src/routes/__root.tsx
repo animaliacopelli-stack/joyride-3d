@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Prism Dash" },
+      { title: "Varity Dash" },
       { name: "description", content: "A 3D rhythm runner that builds its level from any song." },
-      { name: "author", content: "Prism Dash" },
-      { property: "og:title", content: "Prism Dash" },
+      { name: "author", content: "Varity Dash" },
+      { property: "og:title", content: "Varity Dash" },
       { property: "og:description", content: "A 3D rhythm runner that builds its level from any song." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
