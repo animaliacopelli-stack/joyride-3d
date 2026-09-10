@@ -9,6 +9,7 @@ import { LevelSelect } from "./LevelSelect";
 import { RacePanel } from "./RacePanel";
 import { RaceBar } from "./RaceBar";
 import { MatchOverview } from "./MatchOverview";
+import { AdSlot } from "./AdSlot";
 import { TempoPanel } from "./TempoPanel";
 import { Leaderboard } from "./Leaderboard";
 import { Pill } from "./ui";
@@ -146,6 +147,7 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
               <SongPanel />
               <TempoPanel />
               <Leaderboard />
+              <AdSlot />
             </div>
           </div>
         </div>
