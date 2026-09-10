@@ -128,6 +128,7 @@ class World {
 
   private nextBeat = 0;
   private hazardUntil = -10;
+  private lastGrid: BeatGrid | null = null;
 
   reset(seed?: number, cfg?: Partial<WorldConfig>, mode: "menu" | "run" = "run") {
     this.cfg = { ...DEFAULT_CONFIG, ...cfg };
@@ -221,6 +222,11 @@ class World {
 
   private schedule(now: number, grid: BeatGrid) {
     const bpl = this.beatsPerLoop(grid);
+    // a new tempo/track means the beat numbering changed — start counting again
+    if (grid !== this.lastGrid) {
+      this.lastGrid = grid;
+      this.nextBeat = 0;
+    }
     // beats that are already too close to react to are skipped
     while (this.beatTime(this.nextBeat, grid) < now + 0.45) this.nextBeat++;
 
