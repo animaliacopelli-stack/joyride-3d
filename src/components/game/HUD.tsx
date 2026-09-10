@@ -7,6 +7,7 @@ import { shareRun } from "@/lib/leaderboard";
 import { SongPanel } from "./SongPanel";
 import { LevelSelect } from "./LevelSelect";
 import { RacePanel } from "./RacePanel";
+import { RaceBar } from "./RaceBar";
 import { TempoPanel } from "./TempoPanel";
 import { Leaderboard } from "./Leaderboard";
 import { Pill } from "./ui";
