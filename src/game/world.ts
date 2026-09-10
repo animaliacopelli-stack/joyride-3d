@@ -278,10 +278,13 @@ class World {
       width = 2.5;
     } else if (r < 0.64) {
       const count = 1 + Math.floor(this.rng() * (heat > 0.55 ? 3 : 2));
+      // spikes land on successive half-beats instead of a fixed metre gap
+      const sub = period * 0.5;
       for (let i = 0; i < count; i++) {
-        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t, dx: i * 1.5 });
+        this.obstacles.push({ x, type: "spike", w: 1.2, h: 1.5, t: t + i * sub, dx: 0 });
       }
       width = count * 1.5;
+      endT = t + (count - 1) * sub;
     } else {
       // Staircase / platform run.
       const stairs = Math.floor(this.rng() * 3);
