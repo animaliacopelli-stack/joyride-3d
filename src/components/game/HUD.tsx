@@ -147,6 +147,7 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
               <SongPanel />
               <TempoPanel />
               <Leaderboard />
+              <AdSlot />
             </div>
           </div>
         </div>
