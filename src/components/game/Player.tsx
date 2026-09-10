@@ -120,7 +120,7 @@ export function Player({ onDeath }: { onDeath: () => void }) {
     <group ref={group} position={[0, 1.1, 0]}>
       <pointLight ref={glow} color={def.color} intensity={10} distance={10} />
       <group ref={body}>
-        {skin === "smiley" && (
+        {def.shape === "smiley" && (
           <group>
             <mesh castShadow>
               <sphereGeometry args={[RADIUS, 40, 32]} />
@@ -132,10 +132,10 @@ export function Player({ onDeath }: { onDeath: () => void }) {
                 metalness={0.05}
               />
             </mesh>
-            <Face z={RADIUS * 0.94} />
+            <Face z={RADIUS * 0.94} mood={def.mood} />
           </group>
         )}
-        {skin === "cube" && (
+        {def.shape === "cube" && (
           <group>
             <mesh castShadow>
               <boxGeometry args={[RADIUS * 1.75, RADIUS * 1.75, RADIUS * 1.75]} />
@@ -151,10 +151,10 @@ export function Player({ onDeath }: { onDeath: () => void }) {
               <boxGeometry args={[RADIUS * 1.8, RADIUS * 1.8, RADIUS * 1.8]} />
               <meshBasicMaterial color={def.color} wireframe transparent opacity={0.5} />
             </mesh>
-            <Face z={RADIUS * 0.9} />
+            <Face z={RADIUS * 0.9} mood={def.mood} />
           </group>
         )}
-        {skin === "prism" && (
+        {def.shape === "prism" && (
           <group>
             <mesh castShadow rotation-x={Math.PI / 2}>
               <octahedronGeometry args={[RADIUS * 1.15, 0]} />
@@ -167,7 +167,7 @@ export function Player({ onDeath }: { onDeath: () => void }) {
                 flatShading
               />
             </mesh>
-            <Face z={RADIUS * 0.62} />
+            <Face z={RADIUS * 0.62} mood={def.mood} />
           </group>
         )}
       </group>
@@ -175,19 +175,43 @@ export function Player({ onDeath }: { onDeath: () => void }) {
   );
 }
 
-function Face({ z }: { z: number }) {
+function Face({ z, mood = "happy" }: { z: number; mood?: SkinMood }) {
+  const eyeScale: [number, number, number] =
+    mood === "angry" ? [1, 0.9, 0.5] : mood === "sly" ? [1.2, 0.6, 0.5] : mood === "worried" ? [1.1, 1.5, 0.5] : [1, 1.4, 0.5];
+  // mouth: happy/sad arcs, flat line for deadpan moods
+  const flat = mood === "flat";
   return (
     <group position={[0, 0.06, z]}>
-      {[-0.19, 0.19].map((x) => (
-        <mesh key={x} position={[x, 0.09, 0]} scale={[1, 1.4, 0.5]}>
-          <sphereGeometry args={[0.075, 16, 12]} />
+      {[-0.19, 0.19].map((x, i) => (
+        <group key={x}>
+          <mesh position={[x, 0.09, 0]} scale={eyeScale}>
+            <sphereGeometry args={[0.075, 16, 12]} />
+            <meshStandardMaterial color="#20160a" roughness={0.4} />
+          </mesh>
+          {mood === "angry" && (
+            <mesh position={[x, 0.2, 0.02]} rotation-z={i === 0 ? -0.5 : 0.5} scale={[1, 0.25, 0.4]}>
+              <boxGeometry args={[0.19, 0.09, 0.05]} />
+              <meshStandardMaterial color="#20160a" roughness={0.4} />
+            </mesh>
+          )}
+        </group>
+      ))}
+      {flat ? (
+        <mesh position={[0, -0.12, 0]}>
+          <boxGeometry args={[0.34, 0.05, 0.05]} />
           <meshStandardMaterial color="#20160a" roughness={0.4} />
         </mesh>
-      ))}
-      <mesh position={[0, -0.1, 0]} rotation-z={Math.PI} scale={[1, 0.5, 1]}>
-        <torusGeometry args={[0.2, 0.045, 10, 24, Math.PI]} />
-        <meshStandardMaterial color="#20160a" roughness={0.4} />
-      </mesh>
+      ) : (
+        <mesh
+          position={[0, mood === "sad" || mood === "worried" ? -0.18 : -0.1, 0]}
+          rotation-z={mood === "sad" || mood === "worried" ? 0 : Math.PI}
+          scale={[1, mood === "angry" ? 0.7 : 0.5, 1]}
+        >
+          <torusGeometry args={[0.2, 0.045, 10, 24, Math.PI]} />
+          <meshStandardMaterial color="#20160a" roughness={0.4} />
+        </mesh>
+      )}
     </group>
   );
 }
+
