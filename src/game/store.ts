@@ -136,7 +136,7 @@ export const useGameStore = create<GameStore>()(
       score: 0,
       best: 0,
       attempts: 0,
-      skin: "smiley",
+      skin: "verity",
       levelId: ENDLESS_ID,
       bestByLevel: {},
       track: null,
