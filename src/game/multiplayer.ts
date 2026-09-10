@@ -1,7 +1,7 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Track } from "@/lib/music.functions";
-import { useGameStore, type SkinId, type TempoOverride } from "./store";
+import { useGameStore, skinById, type SkinId, type TempoOverride } from "./store";
 
 export type Peer = {
   id: string;
@@ -25,11 +25,8 @@ export type RaceStart = {
   tempo?: TempoOverride | null;
 };
 
-const SKIN_COLORS: Record<SkinId, string> = {
-  smiley: "#ffd23f",
-  cube: "#4de1c1",
-  prism: "#ff5f9e",
-};
+
+
 
 class Multiplayer {
   private channel: RealtimeChannel | null = null;
@@ -62,7 +59,7 @@ class Multiplayer {
       const prev = this.peers.get(p.id);
       const dt = prev ? (now - prev.t) / 1000 : 0;
       const vd = prev && dt > 0.01 && dt < 0.6 ? Math.max(-60, Math.min(60, (p.dist - prev.dist) / dt)) : (prev?.vd ?? 0);
-      this.peers.set(p.id, { ...p, color: SKIN_COLORS[p.skin] ?? "#ffffff", t: now, vd });
+      this.peers.set(p.id, { ...p, color: skinById(p.skin).color, t: now, vd });
     });
 
     channel.on("broadcast", { event: "start" }, ({ payload }) => {
@@ -76,7 +73,7 @@ class Multiplayer {
         return {
           id: key,
           name: m.name ?? "Racer",
-          skin: (m.skin ?? "smiley") as SkinId,
+          skin: (m.skin ?? "verity") as SkinId,
           best: m.best ?? 0,
           alive: true,
         };

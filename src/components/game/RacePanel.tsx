@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Users, Copy, Check } from "lucide-react";
 import { multiplayer, randomRoomCode } from "@/game/multiplayer";
-import { useGameStore, SKINS } from "@/game/store";
+import { useGameStore, skinById } from "@/game/store";
 import { Panel, Pill, Field } from "./ui";
 
 export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
@@ -75,7 +75,7 @@ export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
           </div>
           <div className="flex flex-wrap gap-1.5">
             {roster.map((p) => {
-              const color = SKINS.find((s) => s.id === p.skin)?.color ?? "#fff";
+              const color = skinById(p.skin).color;
               return (
                 <Pill key={p.id} active={p.id === multiplayer.myId} className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />

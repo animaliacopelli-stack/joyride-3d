@@ -18,9 +18,10 @@ export function GameCanvas() {
   const start = useCallback((seedOverride?: number) => {
     const { track, musicOn, levelId } = useGameStore.getState();
     const def = levelById(levelId);
-    const trackSeed = track ? Number(track.id.replace(/\D/g, "").slice(-8)) || 7 : 7;
-    const seed = seedOverride ?? (def.seed || trackSeed);
+    // every attempt builds a fresh layout — races share the room's seed instead
+    const seed = seedOverride ?? ((Math.random() * 0xffffffff) >>> 0);
     world.reset(seed, def.config, "run");
+
     useGameStore.getState().start();
     if (track && musicOn) void music.play(track, 0.7);
     else music.stop();

@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { world, PLAYER_RADIUS } from "@/game/world";
-import { useGameStore, SKINS } from "@/game/store";
+import { useGameStore, skinById } from "@/game/store";
 
 const TRAIL = 28;
 const BURST = 48;
@@ -11,7 +11,7 @@ const dummy = new THREE.Object3D();
 /** Trail behind the player plus a cube burst when a run ends. */
 export function Particles() {
   const skin = useGameStore((s) => s.skin);
-  const def = SKINS.find((s) => s.id === skin)!;
+  const def = skinById(skin);
   const trail = useRef<THREE.InstancedMesh>(null);
   const burst = useRef<THREE.InstancedMesh>(null);
   const trailState = useRef(

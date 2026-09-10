@@ -123,7 +123,7 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
 
               <div>
                 <p className="mb-2 font-display text-[11px] font-bold uppercase tracking-[0.22em] text-ink-muted">Character</p>
-                <div className="flex gap-2">
+                <div className="grid max-h-52 grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3">
                   {SKINS.map((s) => (
                     <Pill
                       key={s.id}
@@ -132,14 +132,18 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
                         setSkin(s.id);
                         multiplayer.updatePresence();
                       }}
-                      className="flex items-center gap-2 px-4 py-2"
+                      className="flex items-center gap-2 px-3 py-2 text-left"
                     >
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: s.color, boxShadow: `0 0 12px ${s.color}` }} />
-                      {s.label}
+                      <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: s.color, boxShadow: `0 0 12px ${s.color}` }} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-[12px] font-semibold">{s.label}</span>
+                        <span className="block truncate text-[10px] text-ink-faint">{s.note}</span>
+                      </span>
                     </Pill>
                   ))}
                 </div>
               </div>
+
 
               <RacePanel onStartRace={onStartRace} />
             </div>

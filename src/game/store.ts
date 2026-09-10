@@ -5,13 +5,54 @@ import { ENDLESS_ID } from "./levels";
 
 export type GameState = "menu" | "playing" | "dead";
 
-export type SkinId = "smiley" | "cube" | "prism";
+export type SkinId =
+  | "verity"
+  | "falsity"
+  | "lovity"
+  | "cruelity"
+  | "disgusity"
+  | "anxiety"
+  | "fearity"
+  | "envity"
+  | "embarrassity"
+  | "ennuity"
+  | "nostalgity"
+  | "verity-god"
+  | "cube"
+  | "prism";
 
-export const SKINS: { id: SkinId; label: string; color: string; accent: string }[] = [
-  { id: "smiley", label: "Smiley", color: "#ffd23f", accent: "#ff8f1f" },
-  { id: "cube", label: "Cube", color: "#4de1c1", accent: "#1a8f7a" },
-  { id: "prism", label: "Prism", color: "#ff5f9e", accent: "#8a1e57" },
+export type SkinShape = "smiley" | "cube" | "prism";
+export type SkinMood = "happy" | "angry" | "sad" | "worried" | "flat" | "sly";
+
+export const SKINS: {
+  id: SkinId;
+  label: string;
+  color: string;
+  accent: string;
+  shape: SkinShape;
+  mood: SkinMood;
+  note: string;
+}[] = [
+  { id: "verity", label: "Verity", color: "#ffd23f", accent: "#ff8f1f", shape: "smiley", mood: "happy", note: "Never lies" },
+  { id: "falsity", label: "Falsity", color: "#3f8cff", accent: "#12306e", shape: "prism", mood: "sly", note: "Always lies" },
+  { id: "lovity", label: "Lovity", color: "#ff8ac4", accent: "#a83370", shape: "smiley", mood: "happy", note: "Helpful" },
+  { id: "cruelity", label: "Cruelity", color: "#ff3b30", accent: "#7a0f0a", shape: "smiley", mood: "angry", note: "Brutal" },
+  { id: "disgusity", label: "Disgusity", color: "#4fd15a", accent: "#1d6b25", shape: "smiley", mood: "flat", note: "Disgust" },
+  { id: "anxiety", label: "Anxiety", color: "#ff9f1c", accent: "#a35400", shape: "smiley", mood: "worried", note: "Anxious" },
+  { id: "fearity", label: "Fearity", color: "#a259ff", accent: "#4b1b8a", shape: "smiley", mood: "worried", note: "Fear" },
+  { id: "envity", label: "Envity", color: "#3fe0e0", accent: "#12706f", shape: "smiley", mood: "sly", note: "Envy" },
+  { id: "embarrassity", label: "Embarrassity", color: "#bfff3f", accent: "#6a8f12", shape: "smiley", mood: "sad", note: "Embarrassed" },
+  { id: "ennuity", label: "Ennuity", color: "#a4713f", accent: "#5b3b1c", shape: "smiley", mood: "flat", note: "Bored" },
+  { id: "nostalgity", label: "Nostalgity", color: "#ff3fd0", accent: "#8a1272", shape: "smiley", mood: "sad", note: "Nostalgia" },
+  { id: "verity-god", label: "Verity God", color: "#ffffff", accent: "#7ad7ff", shape: "smiley", mood: "happy", note: "Rainbow" },
+  { id: "cube", label: "Cube", color: "#4de1c1", accent: "#1a8f7a", shape: "cube", mood: "happy", note: "Classic" },
+  { id: "prism", label: "Prism", color: "#ff5f9e", accent: "#8a1e57", shape: "prism", mood: "happy", note: "Sharp" },
 ];
+
+export function skinById(id: SkinId) {
+  return SKINS.find((s) => s.id === id) ?? SKINS[0]!;
+}
+
 
 export type RoomPlayer = {
   id: string;
@@ -95,7 +136,7 @@ export const useGameStore = create<GameStore>()(
       score: 0,
       best: 0,
       attempts: 0,
-      skin: "smiley",
+      skin: "verity",
       levelId: ENDLESS_ID,
       bestByLevel: {},
       track: null,
