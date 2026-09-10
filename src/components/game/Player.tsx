@@ -1,47 +1,28 @@
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import * as THREE from "three";
-import { world } from "@/game/world";
+import { world, GRAVITY, JUMP_V, PLAYER_RADIUS as RADIUS } from "@/game/world";
 import { useGameStore, SKINS } from "@/game/store";
-
-const GRAVITY = -60;
-const JUMP_V = 21.0;
-const RADIUS = 0.62;
-
-function makeFaceTexture(color: string) {
-  const c = document.createElement("canvas");
-  c.width = c.height = 256;
-  const g = c.getContext("2d")!;
-  g.fillStyle = color;
-  g.fillRect(0, 0, 256, 256);
-  g.fillStyle = "#20160a";
-  g.beginPath();
-  g.ellipse(92, 100, 14, 20, 0, 0, Math.PI * 2);
-  g.ellipse(164, 100, 14, 20, 0, 0, Math.PI * 2);
-  g.fill();
-  g.strokeStyle = "#20160a";
-  g.lineWidth = 12;
-  g.lineCap = "round";
-  g.beginPath();
-  g.arc(128, 140, 46, 0.15 * Math.PI, 0.85 * Math.PI);
-  g.stroke();
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
 
 export function Player({ onDeath }: { onDeath: () => void }) {
   const skin = useGameStore((s) => s.skin);
   const group = useRef<THREE.Group>(null);
+  const body = useRef<THREE.Group>(null);
   const glow = useRef<THREE.PointLight>(null);
+  const squash = useRef(1);
   const def = SKINS.find((s) => s.id === skin)!;
-  const face = useMemo(() => makeFaceTexture(def.color), [def.color]);
 
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
     const g = group.current;
     if (!g) return;
     const state = useGameStore.getState().state;
+
+    if (state === "dead") {
+      g.visible = false;
+      return;
+    }
+    g.visible = true;
 
     if (state !== "playing") {
       const idle = Math.sin(performance.now() / 400) * 0.12;
@@ -50,64 +31,63 @@ export function Player({ onDeath }: { onDeath: () => void }) {
       g.rotation.y += delta * 0.8;
       return;
     }
+    g.rotation.y = 0;
 
-    // Check for collisions and ORB triggers!
+    // collisions + orb trigger zone
     let support = 0;
     let dead = false;
-    let nearOrb = false;
+    let nearOrb: number | null = null;
     const bottom = world.playerY - RADIUS;
-    
-    for (const o of world.obstacles) {
-      // 1. Orb Trigger Zone Check
-      if (o.type === "orb") {
-        const dx = o.x; // Player is always at X: 0
-        const dy = o.h - world.playerY; // Orb's height vs Player's height
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < RADIUS + 1.8) {
-          nearOrb = true;
-        }
-        continue; // Orbs are holographic, they don't have physical collision
-      }
 
-      // 2. Standard block/spike physical collisions
+    for (const o of world.obstacles) {
+      if (o.type === "orb") {
+        const dx = o.x;
+        const dy = o.h - world.playerY;
+        if (dx * dx + dy * dy < (RADIUS + 1.7) ** 2) nearOrb = o.h;
+        continue;
+      }
       if (o.x > RADIUS + o.w / 2 || o.x < -(RADIUS + o.w / 2)) continue;
       if (o.type === "spike") {
-        if (bottom < o.h - 0.25) dead = true;
+        // forgiving hitbox: only the core of the spike kills
+        if (Math.abs(o.x) < RADIUS + o.w / 2 - 0.25 && bottom < o.h - 0.3) dead = true;
+      } else if (bottom < o.h - 0.3) {
+        if (world.playerVy > 0 || bottom < o.h - 0.9) dead = true;
+        else support = Math.max(support, o.h);
       } else {
-        if (bottom < o.h - 0.3) {
-          if (world.playerVy > 0 || bottom < o.h - 0.9) dead = true;
-          else support = Math.max(support, o.h);
-        } else {
-          support = Math.max(support, o.h);
-        }
+        support = Math.max(support, o.h);
       }
     }
 
-    // Jump Logic
     if (world.jumpQueued) {
-      if (nearOrb) {
-        world.playerVy = JUMP_V * 1.3; // GEOMETRY DASH MASSIVE BOOST
-        world.jumps = 1; // Reset to 1 so you can double jump off the orb!
+      if (nearOrb !== null) {
+        world.playerVy = JUMP_V * 1.25;
+        world.jumps = 1; // one more jump available after a ring
         world.grounded = false;
+        world.orbAt = world.clock;
+        world.orbY = nearOrb;
+        squash.current = 1.35;
       } else if (world.jumps < 2) {
         world.playerVy = JUMP_V;
         world.jumps++;
         world.grounded = false;
+        squash.current = 1.25;
       }
       world.jumpQueued = false;
     }
-    
+
     world.playerVy += GRAVITY * delta;
     world.playerY += world.playerVy * delta;
 
     const floor = support + RADIUS;
     if (world.playerY <= floor) {
       world.playerY = floor;
-      if (world.playerVy < 0) world.playerVy = 0;
+      if (world.playerVy < 0) {
+        if (!world.grounded) squash.current = 0.72;
+        world.playerVy = 0;
+      }
       if (!world.grounded) {
         world.rotation = Math.round(world.rotation / (Math.PI / 2)) * (Math.PI / 2);
-        world.jumps = 0; 
+        world.jumps = 0;
       }
       world.grounded = true;
     } else {
@@ -116,43 +96,80 @@ export function Player({ onDeath }: { onDeath: () => void }) {
 
     if (!world.grounded) world.rotation -= delta * 7.5;
 
+    // squash & stretch
+    squash.current += (1 - squash.current) * Math.min(1, delta * 10);
+    if (body.current) {
+      const s = squash.current;
+      body.current.scale.set(1 / Math.sqrt(s), s, 1 / Math.sqrt(s));
+    }
+
     g.position.set(0, world.playerY, 0);
     g.rotation.z = world.rotation;
-    if (glow.current) glow.current.intensity = 8 + Math.sin(performance.now() / 120) * 2;
+    if (glow.current) glow.current.intensity = 10 + Math.sin(performance.now() / 120) * 2;
 
     if (dead) {
       world.shake = 1;
+      world.deathAt = world.clock;
+      world.deathY = world.playerY;
       onDeath();
     }
   });
 
   return (
     <group ref={group} position={[0, 1.1, 0]}>
-      <pointLight ref={glow} color={def.color} intensity={8} distance={9} />
-      {skin === "smiley" && (
-        <group>
-          <mesh castShadow>
-            <sphereGeometry args={[RADIUS, 40, 32]} />
-            <meshStandardMaterial color={def.color} emissive={def.accent} emissiveIntensity={0.25} roughness={0.35} metalness={0.05} />
-          </mesh>
-          <Face z={RADIUS * 0.94} />
-        </group>
-      )}
-      {skin === "cube" && (
-        <group>
-          <mesh castShadow>
-            <boxGeometry args={[RADIUS * 1.75, RADIUS * 1.75, RADIUS * 1.75]} />
-            <meshStandardMaterial map={face} emissive={def.accent} emissiveIntensity={0.3} roughness={0.3} metalness={0.2} />
-          </mesh>
-          <Face z={RADIUS * 0.9} />
-        </group>
-      )}
-      {skin === "prism" && (
-        <mesh castShadow rotation-x={Math.PI / 2}>
-          <octahedronGeometry args={[RADIUS * 1.15, 0]} />
-          <meshStandardMaterial color={def.color} emissive={def.accent} emissiveIntensity={0.6} roughness={0.2} metalness={0.4} flatShading />
-        </mesh>
-      )}
+      <pointLight ref={glow} color={def.color} intensity={10} distance={10} />
+      <group ref={body}>
+        {skin === "smiley" && (
+          <group>
+            <mesh castShadow>
+              <sphereGeometry args={[RADIUS, 40, 32]} />
+              <meshStandardMaterial
+                color={def.color}
+                emissive={def.accent}
+                emissiveIntensity={0.35}
+                roughness={0.3}
+                metalness={0.05}
+              />
+            </mesh>
+            <Face z={RADIUS * 0.94} />
+          </group>
+        )}
+        {skin === "cube" && (
+          <group>
+            <mesh castShadow>
+              <boxGeometry args={[RADIUS * 1.75, RADIUS * 1.75, RADIUS * 1.75]} />
+              <meshStandardMaterial
+                color={def.color}
+                emissive={def.accent}
+                emissiveIntensity={0.4}
+                roughness={0.3}
+                metalness={0.2}
+              />
+            </mesh>
+            <mesh>
+              <boxGeometry args={[RADIUS * 1.8, RADIUS * 1.8, RADIUS * 1.8]} />
+              <meshBasicMaterial color={def.color} wireframe transparent opacity={0.5} />
+            </mesh>
+            <Face z={RADIUS * 0.9} />
+          </group>
+        )}
+        {skin === "prism" && (
+          <group>
+            <mesh castShadow rotation-x={Math.PI / 2}>
+              <octahedronGeometry args={[RADIUS * 1.15, 0]} />
+              <meshStandardMaterial
+                color={def.color}
+                emissive={def.accent}
+                emissiveIntensity={0.8}
+                roughness={0.2}
+                metalness={0.4}
+                flatShading
+              />
+            </mesh>
+            <Face z={RADIUS * 0.62} />
+          </group>
+        )}
+      </group>
     </group>
   );
 }
