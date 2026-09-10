@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { Track } from "@/lib/music.functions";
 import { ENDLESS_ID } from "./levels";
 
@@ -20,6 +21,17 @@ export type RoomPlayer = {
   alive: boolean;
 };
 
+export type TempoOverride = { bpm?: number; offset?: number };
+
+export type LastRun = {
+  levelId: string;
+  distance: number;
+  shareCode: string | null;
+  rank: number | null;
+  personalBest: boolean;
+  status: "saving" | "done" | "error";
+};
+
 interface GameStore {
   state: GameState;
   score: number;
@@ -30,8 +42,16 @@ interface GameStore {
   bestByLevel: Record<string, number>;
   track: Track | null;
   musicOn: boolean;
-  // multiplayer
+  // tempo
+  tempoByTrack: Record<string, TempoOverride>;
+  detected: { id: string; bpm: number; offset: number; confidence: number } | null;
+  analyzing: boolean;
+  // identity + leaderboard
+  playerId: string;
   playerName: string;
+  myShareCodes: Record<string, string>;
+  lastRun: LastRun | null;
+  // multiplayer
   roomCode: string | null;
   roomStatus: "idle" | "joining" | "connected" | "error";
   roster: RoomPlayer[];
@@ -44,7 +64,11 @@ interface GameStore {
   setLevel: (id: string) => void;
   setTrack: (t: Track | null) => void;
   toggleMusic: () => void;
+  setTempo: (trackId: string, o: TempoOverride | null) => void;
+  setDetected: (d: GameStore["detected"], analyzing: boolean) => void;
   setPlayerName: (n: string) => void;
+  setLastRun: (r: LastRun | null) => void;
+  setShareCode: (levelId: string, code: string) => void;
   setRoom: (code: string | null, status: GameStore["roomStatus"]) => void;
   setRoster: (r: RoomPlayer[]) => void;
   setCountdown: (n: number | null) => void;
@@ -56,41 +80,100 @@ function randomName() {
   return `${a[Math.floor(Math.random() * a.length)]} ${b[Math.floor(Math.random() * b.length)]}`;
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  state: "menu",
-  score: 0,
-  best: 0,
-  attempts: 0,
-  skin: "smiley",
-  levelId: ENDLESS_ID,
-  bestByLevel: {},
-  track: null,
-  musicOn: true,
-  playerName: randomName(),
-  roomCode: null,
-  roomStatus: "idle",
-  roster: [],
-  countdown: null,
-  start: () => set((s) => ({ state: "playing", score: 0, attempts: s.attempts + 1 })),
-  die: () =>
-    set((s) => ({
-      state: "dead",
-      best: Math.max(s.best, s.score),
-      bestByLevel: {
-        ...s.bestByLevel,
-        [s.levelId]: Math.max(s.bestByLevel[s.levelId] ?? 0, s.score),
+function uuid() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
+export const useGameStore = create<GameStore>()(
+  persist(
+    (set, get) => ({
+      state: "menu",
+      score: 0,
+      best: 0,
+      attempts: 0,
+      skin: "smiley",
+      levelId: ENDLESS_ID,
+      bestByLevel: {},
+      track: null,
+      musicOn: true,
+      tempoByTrack: {},
+      detected: null,
+      analyzing: false,
+      playerId: uuid(),
+      playerName: randomName(),
+      myShareCodes: {},
+      lastRun: null,
+      roomCode: null,
+      roomStatus: "idle",
+      roster: [],
+      countdown: null,
+      start: () => set((s) => ({ state: "playing", score: 0, attempts: s.attempts + 1, lastRun: null })),
+      die: () =>
+        set((s) => ({
+          state: "dead",
+          best: Math.max(s.best, s.score),
+          bestByLevel: {
+            ...s.bestByLevel,
+            [s.levelId]: Math.max(s.bestByLevel[s.levelId] ?? 0, s.score),
+          },
+        })),
+      toMenu: () => set({ state: "menu", score: 0 }),
+      setScore: (n) => {
+        if (get().score !== n) set({ score: n });
       },
-    })),
-  toMenu: () => set({ state: "menu", score: 0 }),
-  setScore: (n) => {
-    if (get().score !== n) set({ score: n });
-  },
-  setSkin: (skin) => set({ skin }),
-  setLevel: (levelId) => set({ levelId }),
-  setTrack: (track) => set({ track }),
-  toggleMusic: () => set((s) => ({ musicOn: !s.musicOn })),
-  setPlayerName: (playerName) => set({ playerName }),
-  setRoom: (roomCode, roomStatus) => set({ roomCode, roomStatus }),
-  setRoster: (roster) => set({ roster }),
-  setCountdown: (countdown) => set({ countdown }),
-}));
+      setSkin: (skin) => set({ skin }),
+      setLevel: (levelId) => set({ levelId }),
+      setTrack: (track) => set({ track, detected: null }),
+      toggleMusic: () => set((s) => ({ musicOn: !s.musicOn })),
+      setTempo: (trackId, o) =>
+        set((s) => {
+          const next = { ...s.tempoByTrack };
+          if (o && (o.bpm !== undefined || o.offset !== undefined)) next[trackId] = o;
+          else delete next[trackId];
+          return { tempoByTrack: next };
+        }),
+      setDetected: (detected, analyzing) => set({ detected, analyzing }),
+      setPlayerName: (playerName) => set({ playerName }),
+      setLastRun: (lastRun) => set({ lastRun }),
+      setShareCode: (levelId, code) =>
+        set((s) => ({ myShareCodes: { ...s.myShareCodes, [levelId]: code } })),
+      setRoom: (roomCode, roomStatus) => set({ roomCode, roomStatus }),
+      setRoster: (roster) => set({ roster }),
+      setCountdown: (countdown) => set({ countdown }),
+    }),
+    {
+      name: "prism-dash",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({
+        best: s.best,
+        bestByLevel: s.bestByLevel,
+        skin: s.skin,
+        levelId: s.levelId,
+        musicOn: s.musicOn,
+        tempoByTrack: s.tempoByTrack,
+        playerId: s.playerId,
+        playerName: s.playerName,
+        myShareCodes: s.myShareCodes,
+        track: s.track?.source === "apple" ? s.track : null,
+      }),
+    },
+  ),
+);
+
+/** Effective tempo for the current track: manual override wins over detection. */
+export function currentTempo() {
+  const s = useGameStore.getState();
+  const id = s.track?.id;
+  const o = id ? s.tempoByTrack[id] : undefined;
+  const d = s.detected && s.detected.id === id ? s.detected : null;
+  return {
+    bpm: o?.bpm ?? d?.bpm ?? null,
+    offset: o?.offset ?? d?.offset ?? null,
+    manual: !!o,
+    detected: d,
+  };
+}

@@ -1,100 +1,109 @@
 import { useState } from "react";
+import { Users, Copy, Check } from "lucide-react";
 import { multiplayer, randomRoomCode } from "@/game/multiplayer";
-import { useGameStore } from "@/game/store";
+import { useGameStore, SKINS } from "@/game/store";
+import { Panel, Pill, Field } from "./ui";
 
 export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
-  const { roomCode, roomStatus, roster, playerName, setPlayerName } = useGameStore();
+  const { roomCode, roomStatus, roster, playerName, setPlayerName, track } = useGameStore();
   const [code, setCode] = useState("");
-  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  if (!open && !roomCode) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="pointer-events-auto rounded-full border border-white/25 px-5 py-2 text-xs font-semibold text-white/80 transition hover:border-white hover:text-white"
-      >
-        Race a friend
-      </button>
-    );
-  }
+  const copy = async () => {
+    if (!roomCode) return;
+    try {
+      await navigator.clipboard.writeText(roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
 
   return (
-    <div className="pointer-events-auto w-full max-w-md rounded-2xl border border-white/15 bg-black/50 p-4 backdrop-blur-md">
+    <Panel title="Race a friend" icon={<Users className="h-3.5 w-3.5" />}>
       {!roomCode ? (
-        <div className="space-y-3">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Live race</p>
-          <input
+        <div className="space-y-2.5">
+          <Field
             value={playerName}
-            onChange={(e) => setPlayerName(e.target.value.slice(0, 16))}
+            onChange={(e) => {
+              setPlayerName(e.target.value.slice(0, 16));
+            }}
+            onBlur={() => multiplayer.updatePresence()}
             placeholder="Your name"
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/50"
+            className="w-full"
           />
           <div className="flex gap-2">
-            <input
+            <Field
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 5))}
+              onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5))}
               placeholder="ROOM CODE"
-              className="flex-1 rounded-lg border border-white/15 bg-white/5 px-3 py-2 font-mono text-sm tracking-[0.2em] text-white outline-none placeholder:text-white/30 focus:border-white/50"
+              className="flex-1 font-mono tracking-[0.25em]"
             />
             <button
-              disabled={code.length < 4}
+              disabled={code.length < 4 || roomStatus === "joining"}
               onClick={() => void multiplayer.join(code)}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-black disabled:opacity-40"
+              className="rounded-lg bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-40"
             >
               Join
             </button>
           </div>
           <button
             onClick={() => void multiplayer.join(randomRoomCode())}
-            className="w-full rounded-lg border border-white/20 py-2 text-sm font-semibold text-white/80 hover:border-white hover:text-white"
+            disabled={roomStatus === "joining"}
+            className="w-full rounded-lg border border-glass-border py-2 text-sm font-semibold text-ink-muted transition hover:border-ink hover:text-ink disabled:opacity-40"
           >
-            Create a room
+            {roomStatus === "joining" ? "Connecting…" : "Create a room"}
           </button>
-          <button onClick={() => setOpen(false)} className="text-[11px] text-white/40 underline">
-            Close
-          </button>
+          {roomStatus === "error" && (
+            <p className="text-[11px] text-destructive">Couldn't reach the room. Try again in a moment.</p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Room code</p>
-              <p className="font-mono text-2xl font-bold tracking-[0.3em] text-white">{roomCode}</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-ink-faint">Room code</p>
+              <button onClick={() => void copy()} className="flex items-center gap-2 font-display text-2xl font-black tracking-[0.3em] text-ink">
+                {roomCode}
+                {copied ? <Check className="h-4 w-4 text-neon" /> : <Copy className="h-4 w-4 text-ink-faint" />}
+              </button>
             </div>
-            <span className="text-[11px] text-white/50">
+            <span className="text-[11px] text-ink-muted">
               {roomStatus === "connected" ? `${roster.length} in room` : roomStatus}
             </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {roster.map((p) => (
-              <span
-                key={p.id}
-                className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/75"
-              >
-                {p.name}
-                {p.id === multiplayer.myId ? " (you)" : ""}
-              </span>
-            ))}
+          <div className="flex flex-wrap gap-1.5">
+            {roster.map((p) => {
+              const color = SKINS.find((s) => s.id === p.skin)?.color ?? "#fff";
+              return (
+                <Pill key={p.id} active={p.id === multiplayer.myId} className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                  {p.name}
+                  {p.id === multiplayer.myId ? " (you)" : ""}
+                </Pill>
+              );
+            })}
           </div>
           <div className="flex gap-2">
             <button
               onClick={onStartRace}
-              className="flex-1 rounded-lg bg-white py-2 text-sm font-bold text-black"
+              className="flex-1 rounded-lg bg-ink py-2 text-sm font-bold text-background transition hover:opacity-90"
             >
               Start race for everyone
             </button>
             <button
               onClick={() => void multiplayer.leave()}
-              className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white/70 hover:border-white"
+              className="rounded-lg border border-glass-border px-4 py-2 text-sm text-ink-muted transition hover:border-ink hover:text-ink"
             >
               Leave
             </button>
           </div>
-          <p className="text-[11px] text-white/40">
-            Share the code. Everyone runs the same level and sees each other on the track.
+          <p className="text-[11px] leading-snug text-ink-faint">
+            Everyone gets the same level, the same obstacles and — {track?.source === "local" ? "since your song is a local file, the level's own beat" : "your song"}. You'll see each other as glowing ghosts on the track.
           </p>
         </div>
       )}
-    </div>
+    </Panel>
   );
 }

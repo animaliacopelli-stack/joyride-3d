@@ -59,10 +59,50 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --font-display: "Unbounded", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --color-neon: var(--neon);
+  --color-sun: var(--sun);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --animate-beat: beat 0.5s ease-out;
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes beat {
+    from {
+      transform: scale(1.4);
+      opacity: 1;
+    }
+    to {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+  }
+  @keyframes rise {
+    from {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 }
 
 :root {
   --radius: 0.625rem;
+  /* game HUD palette (always dark, sits on top of the 3D scene) */
+  --neon: oklch(0.86 0.15 195);
+  --sun: oklch(0.88 0.17 92);
+  --glass: oklch(0.12 0.03 275 / 62%);
+  --glass-border: oklch(1 0 0 / 14%);
+  --ink: oklch(0.99 0.005 95);
+  --ink-muted: oklch(0.99 0.005 95 / 62%);
+  --ink-faint: oklch(0.99 0.005 95 / 40%);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);

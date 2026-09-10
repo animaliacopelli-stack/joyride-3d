@@ -1,6 +1,7 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useGameStore, type SkinId } from "./store";
+import type { Track } from "@/lib/music.functions";
+import { useGameStore, type SkinId, type TempoOverride } from "./store";
 
 export type Peer = {
   id: string;
@@ -13,7 +14,14 @@ export type Peer = {
   t: number;
 };
 
-export type RaceStart = { seed: number; levelId: string; at: number };
+export type RaceStart = {
+  seed: number;
+  levelId: string;
+  at: number;
+  /** host's song so everyone hears (and jumps to) the same beat */
+  track?: Track | null;
+  tempo?: TempoOverride | null;
+};
 
 const SKIN_COLORS: Record<SkinId, string> = {
   smiley: "#ffd23f",
@@ -114,7 +122,11 @@ class Multiplayer {
   }
 
   startRace(seed: number, levelId: string) {
-    const payload: RaceStart = { seed, levelId, at: Date.now() + 3200 };
+    const s = useGameStore.getState();
+    // local uploads can't be shared, so only Apple tracks travel with the race
+    const track = s.track && s.track.source === "apple" ? s.track : null;
+    const tempo = track ? (s.tempoByTrack[track.id] ?? null) : null;
+    const payload: RaceStart = { seed, levelId, at: Date.now() + 3500, track, tempo };
     void this.channel?.send({ type: "broadcast", event: "start", payload });
     this.onStart?.(payload);
   }
