@@ -8,6 +8,7 @@ import { SongPanel } from "./SongPanel";
 import { LevelSelect } from "./LevelSelect";
 import { RacePanel } from "./RacePanel";
 import { RaceBar } from "./RaceBar";
+import { MatchOverview } from "./MatchOverview";
 import { TempoPanel } from "./TempoPanel";
 import { Leaderboard } from "./Leaderboard";
 import { Pill } from "./ui";
