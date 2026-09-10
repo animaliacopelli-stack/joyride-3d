@@ -12,6 +12,8 @@ export type Peer = {
   dist: number;
   alive: boolean;
   t: number;
+  /** metres per second, derived from the last two packets (for smooth prediction) */
+  vd: number;
 };
 
 export type RaceStart = {
