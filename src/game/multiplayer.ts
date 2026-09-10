@@ -212,6 +212,8 @@ class Multiplayer {
       this.channel = null;
     }
     this.peers.clear();
+    this.results.clear();
+    this.raceActive = false;
     const s = useGameStore.getState();
     s.setRoster([]);
     s.setRoom(null, "idle");
