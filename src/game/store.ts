@@ -29,6 +29,7 @@ export type LastRun = {
   shareCode: string | null;
   rank: number | null;
   personalBest: boolean;
+  status: "saving" | "done" | "error";
 };
 
 interface GameStore {
