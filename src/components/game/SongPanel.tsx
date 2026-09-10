@@ -107,7 +107,8 @@ export function SongPanel() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (q.trim()) search.mutate(q.trim());
+              setTerm(q.trim());
+              void search.refetch();
             }}
             className="flex gap-2"
           >
