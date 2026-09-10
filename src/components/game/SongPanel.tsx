@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, Music2, Loader2, Upload, Trash2, Play, Check } from "lucide-react";
 import { searchTracks, type Track } from "@/lib/music.functions";
 import { addLocalTrack, listLocalTracks, removeLocalTrack } from "@/game/library";
@@ -17,8 +17,21 @@ export function SongPanel() {
   const fileInput = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
 
-  const search = useMutation({
-    mutationFn: (query: string) => fn({ data: { query } }) as Promise<Track[]>,
+  const [term, setTerm] = useState("");
+
+  // search as you type, so nothing depends on hitting the button
+  useEffect(() => {
+    const v = q.trim();
+    const id = setTimeout(() => setTerm(v), 350);
+    return () => clearTimeout(id);
+  }, [q]);
+
+  const search = useQuery({
+    queryKey: ["track-search", term],
+    queryFn: () => fn({ data: { query: term } }) as Promise<Track[]>,
+    enabled: term.length > 0,
+    staleTime: 5 * 60_000,
+    retry: 1,
   });
 
   const mine = useQuery({ queryKey: ["local-tracks"], queryFn: listLocalTracks });
@@ -94,7 +107,8 @@ export function SongPanel() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (q.trim()) search.mutate(q.trim());
+              setTerm(q.trim());
+              void search.refetch();
             }}
             className="flex gap-2"
           >
@@ -109,7 +123,7 @@ export function SongPanel() {
               className="rounded-lg bg-ink px-3 py-2 text-ink-inverse transition hover:opacity-90"
               aria-label="Search songs"
             >
-              {search.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {search.isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             </button>
           </form>
 
@@ -122,11 +136,13 @@ export function SongPanel() {
               ))}
             </ul>
           )}
-          {search.data && search.data.length === 0 && (
+          {search.data && search.data.length === 0 && !search.isFetching && (
             <p className="mt-3 text-xs text-ink-muted">No playable previews found — try another search.</p>
           )}
           {search.isError && (
-            <p className="mt-3 text-xs text-destructive">Search failed. Check your connection and retry.</p>
+            <p className="mt-3 text-xs text-destructive">
+              Search didn&apos;t load. Tap the search button to try again.
+            </p>
           )}
           <p className="mt-3 text-[11px] leading-snug text-ink-faint">
             Plays the official 30-second preview of any track in the Apple Music catalog, viral hits included. Want
