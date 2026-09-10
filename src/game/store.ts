@@ -146,7 +146,7 @@ export const useGameStore = create<GameStore>()(
       setCountdown: (countdown) => set({ countdown }),
     }),
     {
-      name: "prism-dash",
+      name: "varity-dash",
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         best: s.best,

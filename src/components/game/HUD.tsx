@@ -89,7 +89,7 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
             <div className="space-y-5 animate-rise">
               <div>
                 <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tight drop-shadow-[0_6px_30px_rgba(0,0,0,0.6)] sm:text-7xl">
-                  PRISM
+                  VARITY
                   <br />
                   <span className="text-neon">DASH</span>
                 </h1>
