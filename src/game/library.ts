@@ -1,7 +1,7 @@
 import type { Track } from "@/lib/music.functions";
 
 /** Uploaded songs live in the browser (IndexedDB) so they survive reloads. */
-const DB = "prism-dash";
+const DB = "varity-dash";
 const STORE = "tracks";
 
 type Stored = { id: string; name: string; type: string; blob: Blob; added: number };
