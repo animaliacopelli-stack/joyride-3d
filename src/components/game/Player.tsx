@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import { world, GRAVITY, JUMP_V, PLAYER_RADIUS as RADIUS } from "@/game/world";
-import { useGameStore, SKINS } from "@/game/store";
+import { useGameStore, skinById, type SkinMood } from "@/game/store";
 
 export function Player({ onDeath }: { onDeath: () => void }) {
   const skin = useGameStore((s) => s.skin);
@@ -10,7 +10,8 @@ export function Player({ onDeath }: { onDeath: () => void }) {
   const body = useRef<THREE.Group>(null);
   const glow = useRef<THREE.PointLight>(null);
   const squash = useRef(1);
-  const def = SKINS.find((s) => s.id === skin)!;
+  const def = skinById(skin);
+
 
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
