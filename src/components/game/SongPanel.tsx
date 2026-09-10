@@ -17,8 +17,21 @@ export function SongPanel() {
   const fileInput = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
 
-  const search = useMutation({
-    mutationFn: (query: string) => fn({ data: { query } }) as Promise<Track[]>,
+  const [term, setTerm] = useState("");
+
+  // search as you type, so nothing depends on hitting the button
+  useEffect(() => {
+    const v = q.trim();
+    const id = setTimeout(() => setTerm(v), 350);
+    return () => clearTimeout(id);
+  }, [q]);
+
+  const search = useQuery({
+    queryKey: ["track-search", term],
+    queryFn: () => fn({ data: { query: term } }) as Promise<Track[]>,
+    enabled: term.length > 0,
+    staleTime: 5 * 60_000,
+    retry: 1,
   });
 
   const mine = useQuery({ queryKey: ["local-tracks"], queryFn: listLocalTracks });
