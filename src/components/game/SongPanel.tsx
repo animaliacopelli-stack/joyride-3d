@@ -106,7 +106,7 @@ export function SongPanel() {
             />
             <button
               type="submit"
-              className="rounded-lg bg-ink px-3 py-2 text-background transition hover:opacity-90"
+              className="rounded-lg bg-ink px-3 py-2 text-ink-inverse transition hover:opacity-90"
               aria-label="Search songs"
             >
               {search.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}

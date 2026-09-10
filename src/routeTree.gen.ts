@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RunCodeRouteImport } from './routes/run/$code'
 import { Route as ApiPublicAudioRouteImport } from './routes/api/public/audio'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RunCodeRoute = RunCodeRouteImport.update({
+  id: '/run/$code',
+  path: '/run/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAudioRoute = ApiPublicAudioRouteImport.update({
@@ -25,27 +31,31 @@ const ApiPublicAudioRoute = ApiPublicAudioRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/audio'
+  fullPaths: '/' | '/run/$code' | '/api/public/audio'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/audio'
-  id: '__root__' | '/' | '/api/public/audio'
+  to: '/' | '/run/$code' | '/api/public/audio'
+  id: '__root__' | '/' | '/run/$code' | '/api/public/audio'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RunCodeRoute: typeof RunCodeRoute
   ApiPublicAudioRoute: typeof ApiPublicAudioRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/run/$code': {
+      id: '/run/$code'
+      path: '/run/$code'
+      fullPath: '/run/$code'
+      preLoaderRoute: typeof RunCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/audio': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RunCodeRoute: RunCodeRoute,
   ApiPublicAudioRoute: ApiPublicAudioRoute,
 }
 export const routeTree = rootRouteImport

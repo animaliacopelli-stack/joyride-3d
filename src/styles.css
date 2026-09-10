@@ -68,6 +68,7 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-ink-faint: var(--ink-faint);
+  --color-ink-inverse: var(--ink-inverse);
   --animate-beat: beat 0.5s ease-out;
   --animate-rise: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
@@ -103,6 +104,7 @@
   --ink: oklch(0.99 0.005 95);
   --ink-muted: oklch(0.99 0.005 95 / 62%);
   --ink-faint: oklch(0.99 0.005 95 / 40%);
+  --ink-inverse: oklch(0.12 0.03 275);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);

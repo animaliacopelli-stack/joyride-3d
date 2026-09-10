@@ -59,6 +59,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
     Array.from({ length: MAX_PILLARS }, (_, i) => i * 9 + (i % 3) * 2),
   );
   const tex = useMemo(() => gridTexture(theme.grid, theme.ground), [theme.grid, theme.ground]);
+  const gridColor = useMemo(() => new THREE.Color(theme.grid), [theme.grid]);
   const { camera } = useThree();
   const pulse = useRef(0);
 
@@ -90,7 +91,7 @@ export function Level({ themeIndex }: { themeIndex: number }) {
 
     tex.offset.x = world.distance / 8;
     if (groundMat.current) groundMat.current.emissiveIntensity = glow;
-    for (const m of edgeMats.current) if (m) m.color.copy(new THREE.Color(theme.grid)).multiplyScalar(1.2 + beatPulse * 1.6);
+    for (const m of edgeMats.current) if (m) m.color.copy(gridColor).multiplyScalar(1.2 + beatPulse * 1.6);
     if (rimLight.current) rimLight.current.intensity = 12 + level * 50 + beatPulse * 25;
 
     // camera: soft follow + hit shake

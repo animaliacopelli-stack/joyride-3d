@@ -25,6 +25,7 @@ export type Database = {
           share_code: string
           track_artist: string | null
           track_title: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
@@ -36,6 +37,7 @@ export type Database = {
           share_code: string
           track_artist?: string | null
           track_title?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           share_code?: string
           track_artist?: string | null
           track_title?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -67,10 +70,6 @@ export type Database = {
           track_title: string
         }[]
       }
-      get_player_rank: {
-        Args: { _level_id: string; _player_id: string }
-        Returns: number
-      }
       get_run: {
         Args: { _share_code: string }
         Returns: {
@@ -83,6 +82,7 @@ export type Database = {
           track_title: string
         }[]
       }
+      get_run_rank: { Args: { _share_code: string }; Returns: number }
       submit_run: {
         Args: {
           _distance: number
