@@ -136,11 +136,13 @@ export function SongPanel() {
               ))}
             </ul>
           )}
-          {search.data && search.data.length === 0 && (
+          {search.data && search.data.length === 0 && !search.isFetching && (
             <p className="mt-3 text-xs text-ink-muted">No playable previews found — try another search.</p>
           )}
           {search.isError && (
-            <p className="mt-3 text-xs text-destructive">Search failed. Check your connection and retry.</p>
+            <p className="mt-3 text-xs text-destructive">
+              Search didn&apos;t load. Tap the search button to try again.
+            </p>
           )}
           <p className="mt-3 text-[11px] leading-snug text-ink-faint">
             Plays the official 30-second preview of any track in the Apple Music catalog, viral hits included. Want
