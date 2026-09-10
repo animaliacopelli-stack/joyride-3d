@@ -25,11 +25,8 @@ export type RaceStart = {
   tempo?: TempoOverride | null;
 };
 
-const SKIN_COLORS: Record<SkinId, string> = {
-  smiley: "#ffd23f",
-  cube: "#4de1c1",
-  prism: "#ff5f9e",
-};
+
+
 
 class Multiplayer {
   private channel: RealtimeChannel | null = null;

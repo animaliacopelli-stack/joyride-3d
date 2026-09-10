@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Users, Copy, Check } from "lucide-react";
 import { multiplayer, randomRoomCode } from "@/game/multiplayer";
-import { useGameStore, SKINS, skinById } from "@/game/store";
+import { useGameStore, skinById } from "@/game/store";
 import { Panel, Pill, Field } from "./ui";
 
 export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
