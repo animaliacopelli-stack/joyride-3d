@@ -5,7 +5,7 @@
  * and the ad unit id you create there (a number like "1234567890").
  * Until both are filled in, no ads are shown — the game just runs without them.
  */
-export const ADSENSE_CLIENT = "";
+export const ADSENSE_CLIENT = "ca-pub-3472886079351811";
 export const ADSENSE_SLOT = "";
 
 export const adsConfigured = () => ADSENSE_CLIENT.startsWith("ca-pub-") && ADSENSE_SLOT.length > 0;
