@@ -12,13 +12,13 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Prism Dash — 3D Rhythm Runner for Any Song" },
+      { title: "Verity Dash — 3D Rhythm Runner for Any Song" },
       {
         name: "description",
         content:
-          "Prism Dash is a 3D rhythm platformer: every spike lands on the beat of the song you pick or upload. Race friends live and climb the leaderboard.",
+          "Verity Dash is a 3D rhythm platformer: every spike lands on the beat of the song you pick or upload. Race friends live and climb the leaderboard.",
       },
-      { property: "og:title", content: "Prism Dash — 3D Rhythm Runner for Any Song" },
+      { property: "og:title", content: "Verity Dash — 3D Rhythm Runner for Any Song" },
       {
         property: "og:description",
         content: "Dodge beat-perfect obstacles in a 3D runner set to any song. Race friends, upload your own tracks, share your best runs.",

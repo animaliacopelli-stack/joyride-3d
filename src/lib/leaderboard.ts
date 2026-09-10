@@ -44,10 +44,10 @@ export function shareUrl(code: string) {
 
 export async function shareRun(opts: { code: string; distance: number; levelName: string }) {
   const url = shareUrl(opts.code);
-  const text = `I ran ${opts.distance} m on ${opts.levelName} in Prism Dash — beat it:`;
+  const text = `I ran ${opts.distance} m on ${opts.levelName} in Verity Dash — beat it:`;
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
-      await navigator.share({ title: "Prism Dash run", text, url });
+      await navigator.share({ title: "Verity Dash run", text, url });
       return "shared" as const;
     } catch {
       /* user cancelled — fall through to copy */

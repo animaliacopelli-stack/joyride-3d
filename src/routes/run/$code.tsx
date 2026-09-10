@@ -3,17 +3,17 @@ import { getSharedRun } from "@/lib/runs.functions";
 import { levelById, LEVELS } from "@/game/levels";
 import { THEMES } from "@/game/world";
 
-const TITLE = "Prism Dash run";
+const TITLE = "Verity Dash run";
 
 export const Route = createFileRoute("/run/$code")({
   loader: ({ params }) => getSharedRun({ data: { code: params.code } }),
   head: ({ loaderData }) => {
     const run = loaderData ?? null;
     const level = run ? levelById(run.level_id) : null;
-    const title = run ? `${run.player_name} ran ${run.distance} m on ${level?.name ?? "Prism Dash"}` : TITLE;
+    const title = run ? `${run.player_name} ran ${run.distance} m on ${level?.name ?? "Verity Dash"}` : TITLE;
     const description = run
-      ? `Beat ${run.player_name}'s ${run.distance} m on ${level?.name ?? "this level"} in Prism Dash, the 3D rhythm runner that builds its level from your song.`
-      : "A shared Prism Dash run.";
+      ? `Beat ${run.player_name}'s ${run.distance} m on ${level?.name ?? "this level"} in Verity Dash, the 3D rhythm runner that builds its level from your song.`
+      : "A shared Verity Dash run.";
     return {
       meta: [
         { title },
@@ -70,7 +70,7 @@ function Shell({
       style={{ background: `radial-gradient(120% 90% at 50% 0%, ${accent}22 0%, ${bg} 55%, #000 100%)` }}
     >
       <article className="w-full max-w-md rounded-3xl border border-glass-border bg-glass p-8 text-center shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-        <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-ink-muted">Prism Dash</p>
+        <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-ink-muted">Verity Dash</p>
         {eyebrow && (
           <p className="mt-6 font-display text-sm font-extrabold uppercase tracking-[0.2em]" style={{ color: accent }}>
             {eyebrow}
@@ -83,7 +83,7 @@ function Shell({
           search={levelId ? { level: levelId } : {}}
           className="mt-8 inline-block rounded-full bg-ink px-8 py-3 font-display text-sm font-extrabold text-ink-inverse transition hover:scale-[1.03]"
         >
-          {levelId ? "Try to beat it" : "Play Prism Dash"}
+          {levelId ? "Try to beat it" : "Play Verity Dash"}
         </Link>
       </article>
     </main>
