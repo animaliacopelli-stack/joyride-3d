@@ -2,7 +2,7 @@
 - [x] Leaderboard DB (runs table + functions)
 - [x] Fix song search and playback (public search endpoint + same-origin audio proxy)
 - [x] Custom song upload (local files, saved in browser library)
-- [ ] Beat-exact obstacle scheduling from offline beat analysis + manual tempo (BPM/offset/tap)
-- [ ] Leaderboard UI per level + share links (/run/$code)
-- [ ] Visual upgrade: bloom, trail/death particles, fonts, menu redesign, ghost labels
-- [ ] Playtest Neon Bay, Sunset Circuit, live room with two browsers; fix spacing/ghosts/sync
+- [x] Beat-exact obstacle scheduling from offline beat analysis + manual tempo (BPM/offset/tap)
+- [x] Leaderboard UI per level + share links (/run/$code)
+- [x] Visual upgrade: bloom, trail/death particles, fonts, menu redesign, ghost labels
+- [x] Playtest Neon Bay, Sunset Circuit, live room with two browsers; fix spacing/ghosts/sync
