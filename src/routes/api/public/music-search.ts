@@ -9,7 +9,11 @@ const CACHE_TTL_MS = 10 * 60_000;
 const cache = new Map<string, CacheEntry>();
 const inflight = new Map<string, Promise<Track[]>>();
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+class AppleSearchError extends Error {
+  constructor(public status: number) {
+    super(`Apple search returned ${status}`);
+  }
+}
 
 type AppleSearchResult = {
   trackId?: number;
@@ -48,6 +52,11 @@ export const Route = createFileRoute("/api/public/music-search")({
           cache.set(key, { tracks, expires: Date.now() + CACHE_TTL_MS });
           if (cache.size > 300) {
             for (const [k, v] of cache) if (v.expires <= Date.now()) cache.delete(k);
+            while (cache.size > 300) {
+              const oldest = cache.keys().next().value;
+              if (oldest === undefined) break;
+              cache.delete(oldest);
+            }
           }
           return Response.json(
             { tracks },
@@ -58,7 +67,13 @@ export const Route = createFileRoute("/api/public/music-search")({
           if (cached) {
             return Response.json({ tracks: cached.tracks }, { headers: { "cache-control": "no-store" } });
           }
-          return Response.json({ tracks: [], error: "Music search is temporarily unavailable." }, { status: 502 });
+          const limited = error instanceof AppleSearchError && error.status === 429;
+          return Response.json(
+            { tracks: [], error: limited
+              ? "Apple music search is busy. Please wait a minute before trying again."
+              : "Music search is temporarily unavailable. Please try again shortly." },
+            { status: limited ? 429 : 502, headers: { "cache-control": "no-store" } },
+          );
         }
       },
     },
@@ -69,10 +84,9 @@ async function fetchTracks(term: string): Promise<Track[]> {
   const endpoint = new URL("https://itunes.apple.com/search");
   endpoint.search = new URLSearchParams({ media: "music", entity: "song", limit: "20", term }).toString();
 
-  let lastStatus = 0;
-  for (let attempt = 0; attempt < 3; attempt++) {
     const upstream = await fetch(endpoint, {
       headers: { Accept: "application/json", "User-Agent": "VerityDash/1.0" },
+      signal: AbortSignal.timeout(10_000),
     });
     if (upstream.ok) {
       const payload = (await upstream.json()) as { results?: AppleSearchResult[] };
@@ -87,9 +101,5 @@ async function fetchTracks(term: string): Promise<Track[]> {
           source: "apple" as const,
         }));
     }
-    lastStatus = upstream.status;
-    if (upstream.status !== 429 && upstream.status < 500) break;
-    await sleep(250 * 2 ** attempt);
-  }
-  throw new Error(`Apple search returned ${lastStatus}`);
+  throw new AppleSearchError(upstream.status);
 }
