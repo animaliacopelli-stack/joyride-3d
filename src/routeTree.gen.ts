@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RunCodeRouteImport } from './routes/run/$code'
 import { Route as ApiPublicAudioRouteImport } from './routes/api/public/audio'
+import { Route as ApiPublicMusicSearchRouteImport } from './routes/api/public/music-search'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,50 @@ const ApiPublicAudioRoute = ApiPublicAudioRouteImport.update({
   path: '/api/public/audio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMusicSearchRoute = ApiPublicMusicSearchRouteImport.update({
+  id: '/api/public/music-search',
+  path: '/api/public/music-search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
+  '/api/public/music-search': typeof ApiPublicMusicSearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
+  '/api/public/music-search': typeof ApiPublicMusicSearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
+  '/api/public/music-search': typeof ApiPublicMusicSearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/run/$code' | '/api/public/audio'
+  fullPaths:
+    '/' | '/run/$code' | '/api/public/audio' | '/api/public/music-search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/run/$code' | '/api/public/audio'
-  id: '__root__' | '/' | '/run/$code' | '/api/public/audio'
+  to: '/' | '/run/$code' | '/api/public/audio' | '/api/public/music-search'
+  id:
+    | '__root__'
+    | '/'
+    | '/run/$code'
+    | '/api/public/audio'
+    | '/api/public/music-search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RunCodeRoute: typeof RunCodeRoute
   ApiPublicAudioRoute: typeof ApiPublicAudioRoute
+  ApiPublicMusicSearchRoute: typeof ApiPublicMusicSearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/music-search': {
+      id: '/api/public/music-search'
+      path: '/api/public/music-search'
+      fullPath: '/api/public/music-search'
+      preLoaderRoute: typeof ApiPublicMusicSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +112,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RunCodeRoute: RunCodeRoute,
   ApiPublicAudioRoute: ApiPublicAudioRoute,
+  ApiPublicMusicSearchRoute: ApiPublicMusicSearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { Search, Music2, Loader2, Upload, Trash2, Play, Check } from "lucide-react";
-import { searchTracks, type Track } from "@/lib/music.functions";
+import type { Track } from "@/lib/music.functions";
 import { addLocalTrack, listLocalTracks, removeLocalTrack } from "@/game/library";
 import { useGameStore } from "@/game/store";
 import { music } from "@/game/music";
@@ -13,7 +12,6 @@ export function SongPanel() {
   const [tab, setTab] = useState<"search" | "mine">("search");
   const track = useGameStore((s) => s.track);
   const setTrack = useGameStore((s) => s.setTrack);
-  const fn = useServerFn(searchTracks);
   const fileInput = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
 
@@ -28,7 +26,12 @@ export function SongPanel() {
 
   const search = useQuery({
     queryKey: ["track-search", term],
-    queryFn: () => fn({ data: { query: term } }) as Promise<Track[]>,
+    queryFn: async (): Promise<Track[]> => {
+      const response = await fetch(`/api/public/music-search?q=${encodeURIComponent(term)}`);
+      const payload = (await response.json()) as { tracks?: Track[]; error?: string };
+      if (!response.ok) throw new Error(payload.error ?? "Music search failed");
+      return payload.tracks ?? [];
+    },
     enabled: term.length > 0,
     staleTime: 5 * 60_000,
     retry: 1,
