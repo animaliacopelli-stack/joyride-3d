@@ -17,10 +17,10 @@ export function SongPanel() {
 
   const [term, setTerm] = useState("");
 
-  // search as you type, so nothing depends on hitting the button
+  // search as you type, debounced generously so a keystroke burst is one lookup
   useEffect(() => {
     const v = q.trim();
-    const id = setTimeout(() => setTerm(v), 350);
+    const id = setTimeout(() => setTerm(v), 900);
     return () => clearTimeout(id);
   }, [q]);
 
@@ -32,9 +32,11 @@ export function SongPanel() {
       if (!response.ok) throw new Error(payload.error ?? "Music search failed");
       return payload.tracks ?? [];
     },
-    enabled: term.length > 0,
-    staleTime: 5 * 60_000,
-    retry: 1,
+    enabled: term.length > 1,
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 
   const mine = useQuery({ queryKey: ["local-tracks"], queryFn: listLocalTracks });
@@ -110,13 +112,16 @@ export function SongPanel() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              setTerm(q.trim());
-              void search.refetch();
+              const next = q.trim();
+              if (next.length < 2 || search.isFetching) return;
+              if (next === term) void search.refetch();
+              else setTerm(next);
             }}
             className="flex gap-2"
           >
             <Field
               value={q}
+              maxLength={120}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search any song or artist…"
               className="flex-1"
@@ -144,7 +149,7 @@ export function SongPanel() {
           )}
           {search.isError && (
             <p className="mt-3 text-xs text-destructive">
-              Search didn&apos;t load. Tap the search button to try again.
+              {search.error.message || "Search didn't load. Please try again shortly."}
             </p>
           )}
           <p className="mt-3 text-[11px] leading-snug text-ink-faint">
