@@ -148,6 +148,7 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
               <TempoPanel />
               <Leaderboard />
               <nav className="flex flex-wrap gap-x-4 gap-y-2 rounded-2xl border border-glass-border bg-glass px-4 py-3 text-[11px] font-semibold text-ink-muted backdrop-blur-xl">
+                <Link to="/lobby" className="transition hover:text-ink">Race lobby</Link>
                 <Link to="/how-to-play" className="transition hover:text-ink">How to play</Link>
                 <Link to="/levels" className="transition hover:text-ink">Levels guide</Link>
                 <Link to="/characters" className="transition hover:text-ink">Characters</Link>
