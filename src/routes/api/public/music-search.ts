@@ -81,25 +81,65 @@ export const Route = createFileRoute("/api/public/music-search")({
 });
 
 async function fetchTracks(term: string): Promise<Track[]> {
+  try {
+    const apple = await fetchApple(term);
+    if (apple.length) return apple;
+  } catch (error) {
+    const deezer = await fetchDeezer(term).catch(() => []);
+    if (deezer.length) return deezer;
+    throw error;
+  }
+  const deezer = await fetchDeezer(term).catch(() => []);
+  return deezer;
+}
+
+async function fetchApple(term: string): Promise<Track[]> {
   const endpoint = new URL("https://itunes.apple.com/search");
   endpoint.search = new URLSearchParams({ media: "music", entity: "song", limit: "20", term }).toString();
 
-    const upstream = await fetch(endpoint, {
-      headers: { Accept: "application/json", "User-Agent": "VerityDash/1.0" },
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (upstream.ok) {
-      const payload = (await upstream.json()) as { results?: AppleSearchResult[] };
-      return (payload.results ?? [])
-        .filter((result) => result.previewUrl && result.trackName)
-        .map((result) => ({
-          id: String(result.trackId ?? result.previewUrl),
-          title: result.trackName ?? "Unknown song",
-          artist: result.artistName ?? "Unknown artist",
-          artwork: (result.artworkUrl100 ?? "").replace("100x100", "300x300"),
-          previewUrl: result.previewUrl ?? "",
-          source: "apple" as const,
-        }));
-    }
-  throw new AppleSearchError(upstream.status);
+  const upstream = await fetch(endpoint, {
+    headers: { Accept: "application/json", "User-Agent": "VerityDash/1.0" },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!upstream.ok) throw new AppleSearchError(upstream.status);
+  const payload = (await upstream.json()) as { results?: AppleSearchResult[] };
+  return (payload.results ?? [])
+    .filter((result) => result.previewUrl && result.trackName)
+    .map((result) => ({
+      id: String(result.trackId ?? result.previewUrl),
+      title: result.trackName ?? "Unknown song",
+      artist: result.artistName ?? "Unknown artist",
+      artwork: (result.artworkUrl100 ?? "").replace("100x100", "300x300"),
+      previewUrl: result.previewUrl ?? "",
+      source: "apple" as const,
+    }));
+}
+
+type DeezerResult = {
+  id?: number;
+  title?: string;
+  preview?: string;
+  artist?: { name?: string };
+  album?: { cover_medium?: string; cover_big?: string };
+};
+
+async function fetchDeezer(term: string): Promise<Track[]> {
+  const endpoint = new URL("https://api.deezer.com/search");
+  endpoint.search = new URLSearchParams({ q: term, limit: "20" }).toString();
+  const upstream = await fetch(endpoint, {
+    headers: { Accept: "application/json", "User-Agent": "VerityDash/1.0" },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!upstream.ok) throw new Error(`Deezer search returned ${upstream.status}`);
+  const payload = (await upstream.json()) as { data?: DeezerResult[] };
+  return (payload.data ?? [])
+    .filter((result) => result.preview && result.title)
+    .map((result) => ({
+      id: `dz-${result.id ?? result.preview}`,
+      title: result.title ?? "Unknown song",
+      artist: result.artist?.name ?? "Unknown artist",
+      artwork: result.album?.cover_medium ?? result.album?.cover_big ?? "",
+      previewUrl: result.preview ?? "",
+      source: "apple" as const,
+    }));
 }
