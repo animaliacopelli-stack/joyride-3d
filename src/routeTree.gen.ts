@@ -10,6 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CharactersRouteImport } from './routes/characters'
+import { Route as HowToPlayRouteImport } from './routes/how-to-play'
+import { Route as LevelsRouteImport } from './routes/levels'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as RunCodeRouteImport } from './routes/run/$code'
 import { Route as ApiPublicAudioRouteImport } from './routes/api/public/audio'
 import { Route as ApiPublicMusicSearchRouteImport } from './routes/api/public/music-search'
@@ -17,6 +23,36 @@ import { Route as ApiPublicMusicSearchRouteImport } from './routes/api/public/mu
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CharactersRoute = CharactersRouteImport.update({
+  id: '/characters',
+  path: '/characters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowToPlayRoute = HowToPlayRouteImport.update({
+  id: '/how-to-play',
+  path: '/how-to-play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LevelsRoute = LevelsRouteImport.update({
+  id: '/levels',
+  path: '/levels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RunCodeRoute = RunCodeRouteImport.update({
@@ -37,12 +73,24 @@ const ApiPublicMusicSearchRoute = ApiPublicMusicSearchRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/characters': typeof CharactersRoute
+  '/how-to-play': typeof HowToPlayRoute
+  '/levels': typeof LevelsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
   '/api/public/music-search': typeof ApiPublicMusicSearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/characters': typeof CharactersRoute
+  '/how-to-play': typeof HowToPlayRoute
+  '/levels': typeof LevelsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
   '/api/public/music-search': typeof ApiPublicMusicSearchRoute
@@ -50,6 +98,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/characters': typeof CharactersRoute
+  '/how-to-play': typeof HowToPlayRoute
+  '/levels': typeof LevelsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/run/$code': typeof RunCodeRoute
   '/api/public/audio': typeof ApiPublicAudioRoute
   '/api/public/music-search': typeof ApiPublicMusicSearchRoute
@@ -57,12 +111,37 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/run/$code' | '/api/public/audio' | '/api/public/music-search'
+    | '/'
+    | '/about'
+    | '/characters'
+    | '/how-to-play'
+    | '/levels'
+    | '/privacy'
+    | '/terms'
+    | '/run/$code'
+    | '/api/public/audio'
+    | '/api/public/music-search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/run/$code' | '/api/public/audio' | '/api/public/music-search'
+  to:
+    | '/'
+    | '/about'
+    | '/characters'
+    | '/how-to-play'
+    | '/levels'
+    | '/privacy'
+    | '/terms'
+    | '/run/$code'
+    | '/api/public/audio'
+    | '/api/public/music-search'
   id:
     | '__root__'
     | '/'
+    | '/about'
+    | '/characters'
+    | '/how-to-play'
+    | '/levels'
+    | '/privacy'
+    | '/terms'
     | '/run/$code'
     | '/api/public/audio'
     | '/api/public/music-search'
@@ -70,6 +149,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CharactersRoute: typeof CharactersRoute
+  HowToPlayRoute: typeof HowToPlayRoute
+  LevelsRoute: typeof LevelsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   RunCodeRoute: typeof RunCodeRoute
   ApiPublicAudioRoute: typeof ApiPublicAudioRoute
   ApiPublicMusicSearchRoute: typeof ApiPublicMusicSearchRoute
@@ -82,6 +167,48 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/characters': {
+      id: '/characters'
+      path: '/characters'
+      fullPath: '/characters'
+      preLoaderRoute: typeof CharactersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-to-play': {
+      id: '/how-to-play'
+      path: '/how-to-play'
+      fullPath: '/how-to-play'
+      preLoaderRoute: typeof HowToPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/levels': {
+      id: '/levels'
+      path: '/levels'
+      fullPath: '/levels'
+      preLoaderRoute: typeof LevelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/run/$code': {
@@ -110,6 +237,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CharactersRoute: CharactersRoute,
+  HowToPlayRoute: HowToPlayRoute,
+  LevelsRoute: LevelsRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   RunCodeRoute: RunCodeRoute,
   ApiPublicAudioRoute: ApiPublicAudioRoute,
   ApiPublicMusicSearchRoute: ApiPublicMusicSearchRoute,
