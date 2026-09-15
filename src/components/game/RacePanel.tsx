@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Users, Copy, Check } from "lucide-react";
 import { multiplayer, randomRoomCode } from "@/game/multiplayer";
 import { useGameStore, skinById } from "@/game/store";
+import { Link } from "@tanstack/react-router";
 import { Panel, Pill, Field } from "./ui";
 
 export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
@@ -55,6 +56,12 @@ export function RacePanel({ onStartRace }: { onStartRace: () => void }) {
           >
             {roomStatus === "joining" ? "Connecting…" : "Create a room"}
           </button>
+          <Link
+            to="/lobby"
+            className="block text-center text-[11px] font-semibold text-neon transition hover:underline"
+          >
+            Browse open rooms in the lobby
+          </Link>
           {roomStatus === "error" && (
             <p className="text-[11px] text-destructive">Couldn't reach the room. Try again in a moment.</p>
           )}
