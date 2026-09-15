@@ -5,7 +5,13 @@ import { createFileRoute } from "@tanstack/react-router";
  * CORS headers, so the browser can't analyse (or, with crossOrigin set, even
  * play) the previews directly. Only Apple hosts are allowed through.
  */
-const ALLOWED_HOSTS = [/(^|\.)itunes\.apple\.com$/i, /(^|\.)mzstatic\.com$/i, /(^|\.)apple\.com$/i];
+const ALLOWED_HOSTS = [
+  /(^|\.)itunes\.apple\.com$/i,
+  /(^|\.)mzstatic\.com$/i,
+  /(^|\.)apple\.com$/i,
+  /(^|\.)dzcdn\.net$/i,
+  /(^|\.)deezer\.com$/i,
+];
 
 const PASS_HEADERS = [
   "content-type",
