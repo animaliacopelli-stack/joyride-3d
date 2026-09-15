@@ -58,13 +58,11 @@ class Lobby {
       racing,
     };
     void this.connect().then(() => {
-      console.log("LOBBY advertise", JSON.stringify(this.advertising), !!this.channel);
-      if (this.advertising) void this.channel?.track(this.advertising).then((r) => console.log("LOBBY track result", JSON.stringify(r)));
+      if (this.advertising) void this.channel?.track(this.advertising);
     });
   }
 
   private async connect() {
-    console.log("LOBBY connect start");
     if (this.channel) return;
     const channel = supabase.channel("lobby", {
       config: { presence: { key: this.id } },
@@ -73,7 +71,6 @@ class Lobby {
     channel.on("presence", { event: "sync" }, () => this.sync(channel));
     await new Promise<void>((resolve) => {
       channel.subscribe((status) => {
-        console.log("LOBBY status", status);
         if (status === "SUBSCRIBED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") resolve();
       });
     });
@@ -92,13 +89,11 @@ class Lobby {
       room.racing = room.racing || !!m.racing;
       room.players.push({ name: m.name || "Racer", skin: m.skin, color: skinById(m.skin).color });
     }
-    console.log("LOBBY sync", JSON.stringify(state));
     this.cache = [...byCode.values()].sort((a, b) => b.players.length - a.players.length);
     for (const fn of this.listeners) fn(this.cache);
   }
 
   private maybeDisconnect() {
-    console.log("LOBBY maybeDisconnect", this.watchers, JSON.stringify(this.advertising), new Error().stack);
     if (this.watchers > 0 || this.advertising) return;
     const ch = this.channel;
     this.channel = null;
