@@ -98,6 +98,7 @@ class Lobby {
   }
 
   private maybeDisconnect() {
+    console.log("LOBBY maybeDisconnect", this.watchers, JSON.stringify(this.advertising), new Error().stack);
     if (this.watchers > 0 || this.advertising) return;
     const ch = this.channel;
     this.channel = null;
