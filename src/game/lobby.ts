@@ -64,6 +64,7 @@ class Lobby {
   }
 
   private async connect() {
+    console.log("LOBBY connect start");
     if (this.channel) return;
     const channel = supabase.channel("lobby", {
       config: { presence: { key: this.id } },
@@ -72,6 +73,7 @@ class Lobby {
     channel.on("presence", { event: "sync" }, () => this.sync(channel));
     await new Promise<void>((resolve) => {
       channel.subscribe((status) => {
+        console.log("LOBBY status", status);
         if (status === "SUBSCRIBED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") resolve();
       });
     });
