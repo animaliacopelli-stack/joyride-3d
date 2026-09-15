@@ -134,13 +134,21 @@ export function GameCanvas() {
     return () => window.removeEventListener("keydown", onKey);
   }, [jump]);
 
-  useEffect(
-    () => () => {
+  // Leaving the room is deferred so a quick remount (dev strict mode, fast
+  // re-render after joining from the lobby) doesn't drop the player's room.
+  useEffect(() => {
+    if (pendingLeave !== null) {
+      clearTimeout(pendingLeave);
+      pendingLeave = null;
+    }
+    return () => {
       music.stop();
-      void multiplayer.leave();
-    },
-    [],
-  );
+      pendingLeave = setTimeout(() => {
+        pendingLeave = null;
+        void multiplayer.leave();
+      }, 600) as unknown as number;
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black font-body">
