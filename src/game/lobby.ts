@@ -58,7 +58,8 @@ class Lobby {
       racing,
     };
     void this.connect().then(() => {
-      if (this.advertising) void this.channel?.track(this.advertising);
+      console.log("LOBBY advertise", JSON.stringify(this.advertising), !!this.channel);
+      if (this.advertising) void this.channel?.track(this.advertising).then((r) => console.log("LOBBY track result", JSON.stringify(r)));
     });
   }
 
@@ -89,6 +90,7 @@ class Lobby {
       room.racing = room.racing || !!m.racing;
       room.players.push({ name: m.name || "Racer", skin: m.skin, color: skinById(m.skin).color });
     }
+    console.log("LOBBY sync", JSON.stringify(state));
     this.cache = [...byCode.values()].sort((a, b) => b.players.length - a.players.length);
     for (const fn of this.listeners) fn(this.cache);
   }
