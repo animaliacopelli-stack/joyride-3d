@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 const NAV = [
   { to: "/", label: "Play" },
+  { to: "/lobby", label: "Lobby" },
   { to: "/how-to-play", label: "How to play" },
   { to: "/levels", label: "Levels" },
   { to: "/characters", label: "Characters" },

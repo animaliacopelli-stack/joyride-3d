@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as HowToPlayRouteImport } from './routes/how-to-play'
 import { Route as LevelsRouteImport } from './routes/levels'
+import { Route as LobbyRouteImport } from './routes/lobby'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as RunCodeRouteImport } from './routes/run/$code'
@@ -43,6 +44,11 @@ const HowToPlayRoute = HowToPlayRouteImport.update({
 const LevelsRoute = LevelsRouteImport.update({
   id: '/levels',
   path: '/levels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LobbyRoute = LobbyRouteImport.update({
+  id: '/lobby',
+  path: '/lobby',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/characters': typeof CharactersRoute
   '/how-to-play': typeof HowToPlayRoute
   '/levels': typeof LevelsRoute
+  '/lobby': typeof LobbyRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/run/$code': typeof RunCodeRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/characters': typeof CharactersRoute
   '/how-to-play': typeof HowToPlayRoute
   '/levels': typeof LevelsRoute
+  '/lobby': typeof LobbyRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/run/$code': typeof RunCodeRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/characters': typeof CharactersRoute
   '/how-to-play': typeof HowToPlayRoute
   '/levels': typeof LevelsRoute
+  '/lobby': typeof LobbyRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/run/$code': typeof RunCodeRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/how-to-play'
     | '/levels'
+    | '/lobby'
     | '/privacy'
     | '/terms'
     | '/run/$code'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/how-to-play'
     | '/levels'
+    | '/lobby'
     | '/privacy'
     | '/terms'
     | '/run/$code'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/how-to-play'
     | '/levels'
+    | '/lobby'
     | '/privacy'
     | '/terms'
     | '/run/$code'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   CharactersRoute: typeof CharactersRoute
   HowToPlayRoute: typeof HowToPlayRoute
   LevelsRoute: typeof LevelsRoute
+  LobbyRoute: typeof LobbyRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   RunCodeRoute: typeof RunCodeRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/levels'
       fullPath: '/levels'
       preLoaderRoute: typeof LevelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lobby': {
+      id: '/lobby'
+      path: '/lobby'
+      fullPath: '/lobby'
+      preLoaderRoute: typeof LobbyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   CharactersRoute: CharactersRoute,
   HowToPlayRoute: HowToPlayRoute,
   LevelsRoute: LevelsRoute,
+  LobbyRoute: LobbyRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   RunCodeRoute: RunCodeRoute,
