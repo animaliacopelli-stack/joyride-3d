@@ -12,6 +12,8 @@ import { submitRun } from "@/lib/leaderboard";
 
 const MIN_RANKED_DISTANCE = 15;
 
+let pendingLeave: number | null = null;
+
 export function GameCanvas() {
   const queryClient = useQueryClient();
 
