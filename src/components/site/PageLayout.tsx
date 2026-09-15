@@ -20,7 +20,7 @@ export function PageLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background text-ink">
+    <div className="dark min-h-screen bg-background font-body text-ink">
       <header className="border-b border-glass-border bg-glass backdrop-blur-xl">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-2 px-5 py-4">
           <Link to="/" className="font-display text-lg font-black tracking-tight">
