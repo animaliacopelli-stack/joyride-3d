@@ -9,7 +9,7 @@ import { LevelSelect } from "./LevelSelect";
 import { RacePanel } from "./RacePanel";
 import { RaceBar } from "./RaceBar";
 import { MatchOverview } from "./MatchOverview";
-import { AdSlot } from "./AdSlot";
+import { Link } from "@tanstack/react-router";
 import { TempoPanel } from "./TempoPanel";
 import { Leaderboard } from "./Leaderboard";
 import { Pill } from "./ui";
@@ -147,7 +147,14 @@ export function HUD({ onStart, onStartRace }: { onStart: () => void; onStartRace
               <SongPanel />
               <TempoPanel />
               <Leaderboard />
-              <AdSlot />
+              <nav className="flex flex-wrap gap-x-4 gap-y-2 rounded-2xl border border-glass-border bg-glass px-4 py-3 text-[11px] font-semibold text-ink-muted backdrop-blur-xl">
+                <Link to="/how-to-play" className="transition hover:text-ink">How to play</Link>
+                <Link to="/levels" className="transition hover:text-ink">Levels guide</Link>
+                <Link to="/characters" className="transition hover:text-ink">Characters</Link>
+                <Link to="/about" className="transition hover:text-ink">About</Link>
+                <Link to="/privacy" className="transition hover:text-ink">Privacy</Link>
+                <Link to="/terms" className="transition hover:text-ink">Terms</Link>
+              </nav>
             </div>
           </div>
         </div>
