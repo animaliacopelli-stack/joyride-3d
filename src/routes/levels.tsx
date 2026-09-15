@@ -44,7 +44,10 @@ function LevelsPage() {
           {LEVELS.map((l) => (
             <article key={l.id} className="rounded-2xl border border-glass-border bg-glass p-4 backdrop-blur-xl">
               <h3 className="font-display text-lg font-extrabold text-ink">{l.name}</h3>
-              <p className="mt-1 text-sm text-ink-muted">{l.blurb ?? "A generated run tuned to its own tempo."}</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-ink-faint">
+                {l.difficulty} · {l.bpm} BPM default tempo
+              </p>
+              <p className="mt-2 text-sm text-ink-muted">{l.subtitle}</p>
               <Link
                 to="/"
                 search={{ level: l.id }}
