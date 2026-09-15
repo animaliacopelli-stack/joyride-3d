@@ -2,6 +2,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Track } from "@/lib/music.functions";
 import { useGameStore, skinById, type SkinId, type TempoOverride } from "./store";
+import { lobby } from "./lobby";
 
 export type Peer = {
   id: string;
@@ -148,6 +149,7 @@ class Multiplayer {
           const s = useGameStore.getState();
           void channel.track({ name: s.playerName, skin: s.skin, best: s.best });
           s.setRoom(code, "connected");
+          lobby.advertise(code);
           resolve();
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           useGameStore.getState().setRoom(code, "error");
@@ -161,6 +163,7 @@ class Multiplayer {
     if (!this.channel) return;
     const s = useGameStore.getState();
     void this.channel.track({ name: s.playerName, skin: s.skin, best: s.best });
+    if (s.roomCode) lobby.advertise(s.roomCode, this.raceActive);
   }
 
   /** Throttled position broadcast (about 25/s). */
@@ -192,6 +195,7 @@ class Multiplayer {
     const payload: RaceStart = { seed, levelId, at: Date.now() + 3500, track, tempo };
     this.results.clear();
     this.raceActive = true;
+    if (s.roomCode) lobby.advertise(s.roomCode, true);
     void this.channel?.send({ type: "broadcast", event: "start", payload });
     this.onStart?.(payload);
   }
@@ -211,6 +215,7 @@ class Multiplayer {
       await supabase.removeChannel(this.channel);
       this.channel = null;
     }
+    lobby.advertise(null);
     this.peers.clear();
     this.results.clear();
     this.raceActive = false;
